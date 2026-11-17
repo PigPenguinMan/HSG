@@ -78,6 +78,6 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
   - **투사체 샷건**: 단일 대상 1발 명중 제한(PoE1 방식)
   - **거래(Trade)**: 오프라인 싱글 전용 + NPC 단방향/손실 환전 + 세이브/아이템 시드 기반 RNG
   - **사망/하드코어**: 일반 모드 기본(Act 1 손실 0%, Act 2~3 5%, 맵 10%) + v0.2 이후 하드코어 옵션 추가
+- **영문 고유명사 정리 완료**: `3.6` 지적 사항에 따라 `Keystone`/`Ascendancy`/`Chaos Orb`/`Cyclone`/`Lacerate` 등 PoE1 고유 영문명을 자체 IP 영문명(`Apex Node`, `Bloodline`, `Bloodstone of ...`, `Whirlclaw`, `Crimson Flurry` 등)으로 전면 교체했습니다.
 - **보류 (다음 결정 필요)**:
   - **기술 스택 / 엔진 선택**: `Godot 4` vs `TypeScript + Phaser 3` 미정 (단, `Phase 0` 순수 로직을 먼저 분리 설계하므로 결정 전에도 진행 가능)
-  - **영문 고유명사 정리**: `3.6` 지적 사항(PoE1 고유명사 `Cyclone`, `Chaos Orb` 등)은 공개 배포 전 자체 영문명으로 리네이밍 예정

@@ -30,27 +30,27 @@ PoE1의 핵심 재미인 **스킬 1개를 여러 보조 효과로 개조하는 �
 ### 2.1 액티브 스킬 (Active Skills)
 | 성향 | 스킬명 | 태그 | 특징 및 메커니즘 |
 | :--- | :--- | :--- | :--- |
-| **STR (근접)** | **분쇄의 일격** *(Ground Slam)* | `Attack, Melee, AoE, Physical` | 전방 부채꼴로 대지를 강타해 충격파를 날림. 기절 확률 보너스. |
-| **STR (근접)** | **회오리 발톱** *(Cyclone)* | `Attack, Melee, AoE, Channelling` | 회전하며 이동과 동시에 주변 모든 적을 베어냄 (핵 앤 슬래시 대표 스킬). |
-| **STR (이동)** | **야수의 도약** *(Leap Slam)* | `Attack, Melee, AoE, Movement` | 지정 위치로 뛰어올라 착지 시 주변에 물리 피해 및 밀쳐내기. |
-| **DEX (투사체)** | **관통하는 송곳니** *(Split Arrow)* | `Attack, Projectile, Physical` | 부채꼴로 여러 발의 화살/단검을 동시에 발사. |
-| **DEX (근접)** | **핏빛 난무** *(Lacerate)* | `Attack, Melee, Bleed` | 좌우로 X자 검기를 두 번 날리며, 출혈 확률 및 출혈 피해 증폭. |
-| **DEX (이동)** | **그림자 질주** *(Whirling Blades)* | `Attack, Melee, Movement` | 적을 관통하며 빠르게 베고 지나가는 기동 스킬 (단검/발톱 전용). |
-| **INT (주문)** | **혈월의 화염구** *(Blood Fireball)* | `Spell, Projectile, AoE, Fire` | 적중 시 폭발하며 범위 화염 피해 및 높은 확률로 점화 부여. |
-| **INT (주문)** | **연쇄 번개** *(Arc)* | `Spell, Lightning, Chain` | 가장 가까운 적에게 번개가 최대 5~7회 연쇄 타격. |
+| **STR (근접)** | **분쇄의 일격** *(Crushing Slam)* | `Attack, Melee, AoE, Physical` | 전방 부채꼴로 대지를 강타해 충격파를 날림. 기절 확률 보너스. |
+| **STR (근접)** | **회오리 발톱** *(Whirlclaw)* | `Attack, Melee, AoE, Channelling` | 회전하며 이동과 동시에 주변 모든 적을 베어냄 (핵 앤 슬래시 대표 스킬). |
+| **STR (이동)** | **야수의 도약** *(Feral Leap)* | `Attack, Melee, AoE, Movement` | 지정 위치로 뛰어올라 착지 시 주변에 물리 피해 및 밀쳐내기. |
+| **DEX (투사체)** | **관통하는 송곳니** *(Piercing Fang)* | `Attack, Projectile, Physical` | 부채꼴로 여러 발의 화살/단검을 동시에 발사. |
+| **DEX (근접)** | **핏빛 난무** *(Crimson Flurry)* | `Attack, Melee, Bleed` | 좌우로 X자 검기를 두 번 날리며, 출혈 확률 및 출혈 피해 증폭. |
+| **DEX (이동)** | **그림자 질주** *(Shadow Dash)* | `Attack, Melee, Movement` | 적을 관통하며 빠르게 베고 지나가는 기동 스킬 (단검/발톱 전용). |
+| **INT (주문)** | **혈월의 화염구** *(Bloodmoon Orb)* | `Spell, Projectile, AoE, Fire` | 적중 시 폭발하며 범위 화염 피해 및 높은 확률로 점화 부여. |
+| **INT (주문)** | **연쇄 번개** *(Chain Bolt)* | `Spell, Lightning, Chain` | 가장 가까운 적에게 번개가 최대 5~7회 연쇄 타격. |
 | **INT (소환)** | **망령 늑대 소환** *(Summon Spirit Wolf)* | `Spell, Minion, Physical` | 적을 추적해 물어뜯고 출혈을 거는 영혼 늑대 최대 3~4마리 소환. |
-| **INT (이동)** | **혈무 점멸** *(Blood Dash)* | `Spell, Movement` | 핏빛 안개로 변해 지형/벽을 넘어 지정 위치로 즉시 순간이동. |
-| **DEX/INT** | **독성 늪지** *(Caustic Trap)* | `Spell, AoE, Chaos, Poison` | 적이 밟으면 터지며 지속 혼돈 피해 장판을 남기는 덫 투척. |
+| **INT (이동)** | **혈무 점멸** *(Mist Blink)* | `Spell, Movement` | 핏빛 안개로 변해 지형/벽을 넘어 지정 위치로 즉시 순간이동. |
+| **DEX/INT** | **독성 늪지** *(Venom Mire)* | `Spell, AoE, Chaos, Poison` | 적이 밟으면 터지며 지속 혼돈 피해 장판을 남기는 덫 투척. |
 | **공용 (오라)** | **야성의 포효 / 철갑의 오라** | `Aura, Buff` | 최대 마나의 `35~50%`를 점유하여 공격 속도 증가 또는 방어도 대폭 상승. |
 
 ### 2.2 보조 룬 (Support Runes — 곱연산 증폭 및 메커니즘 변형)
-1. **다중 투사체 (Multiple Projectiles)**: `Projectile` 태그 스킬의 투사체 `+2~4개` 추가 (대신 투사체 피해 `20% 감폭`).
-2. **연쇄의 룬 (Chain)**: `Projectile` 또는 `Chain` 스킬이 적 적중 후 주변 다른 적에게 `+1~2회` 튕김.
-3. **포악한 공격 (Brutality)**: 물리 피해 `35% 증폭` (단, 원소·혼돈 피해를 전혀 입힐 수 없음).
-4. **원소 집중 (Elemental Focus)**: 원소 피해 `35% 증폭` (단, 상태이상인 점화·냉각·감전을 유발할 수 없음).
-5. **치명적 중독 (Deadly Ailments)**: 상태이상(출혈·독·점화) 피해 `45% 증폭`, 직접 타격 피해 `20% 감폭`.
+1. **다중 투사체 (Volley)**: `Projectile` 태그 스킬의 투사체 `+2~4개` 추가 (대신 투사체 피해 `20% 감폭`).
+2. **연쇄의 룬 (Ricochet)**: `Projectile` 또는 `Chain` 스킬이 적 적중 후 주변 다른 적에게 `+1~2회` 튕김.
+3. **포악한 공격 (Savagery)**: 물리 피해 `35% 증폭` (단, 원소·혼돈 피해를 전혀 입힐 수 없음).
+4. **원소 집중 (Pure Element)**: 원소 피해 `35% 증폭` (단, 상태이상인 점화·냉각·감전을 유발할 수 없음).
+5. **치명적 중독 (Festering)**: 상태이상(출혈·독·점화) 피해 `45% 증폭`, 직접 타격 피해 `20% 감폭`.
 6. **광역 증가 / 집중 효과**: 범위(AoE)를 넓혀 사냥 속도를 높이거나, 범위를 줄이는 대신 보스전 범위 피해 `40% 증폭`.
-7. **생명력 흡수 (Life Leech)**: 타격 피해의 `2%`를 생명력으로 흡수.
+7. **생명력 흡수 (Blood Drain)**: 타격 피해의 `2%`를 생명력으로 흡수.
 
 ---
 
@@ -92,7 +92,7 @@ PoE1의 핵심 재미인 **스킬 1개를 여러 보조 효과로 개조하는 �
 
 ```json
 {
-  "skillId": "skill_lacerate",
+  "skillId": "skill_crimson_flurry",
   "name": "핏빛 난무",
   "tags": ["ATTACK", "MELEE", "AOE", "PHYSICAL", "BLEED"],
   "manaCost": 12,

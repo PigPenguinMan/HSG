@@ -58,7 +58,7 @@ $$\text{IncreasedMultiplier} = 1 + \sum \text{Increased}\% - \sum \text{Reduced}
 
 #### Step 4. 증폭/감폭 (More / Less — 곱연산 & 중복 제한)
 $$\text{MoreMultiplier} = \prod_{i} (1 + \text{More}_i\%) \times \prod_{j} (1 - \text{Less}_j\%)$$
-- 보조 룬(Support Rune), 핵심 노드(Keystone), 혈통 각성(전직) 등에서 오는 `% 증폭`은 각각 독립적으로 곱해져 빌드의 최종 고점을 결정합니다.
+- 보조 룬(Support Rune), 핵심 노드(Apex Node), 혈통 각성(Bloodline) 등에서 오는 `% 증폭`은 각각 독립적으로 곱해져 빌드의 최종 고점을 결정합니다.
 - **중복 제한 규칙**: 동일한 이름/출처 ID를 가진 `More` 모디파이어(예: 같은 보조 룬 2개 장착)는 중복 적용되지 않으며, 단일 스킬에 연결 가능한 보조 룬은 최대 5개(6링크)로 제한합니다.
 
 #### Step 5. 치명타 (Critical Strike)
