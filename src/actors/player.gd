@@ -53,6 +53,11 @@ var _dash_timer: float = 0.0
 var _dash_dir: Vector2 = Vector2.ZERO
 var _shot_group_counter: int = 1
 var _body_node: Node2D
+var _cam: Camera2D
+var _shake_intensity: float = 0.0
+var _shake_timer: float = 0.0
+var _hitstop_active: bool = false
+var _hurt_flash_timer: float = 0.0
 
 
 func _ready() -> void:
@@ -71,11 +76,11 @@ func _ready() -> void:
 
 	_build_wolf_pixel_sprite()
 
-	var cam := Camera2D.new()
-	cam.position_smoothing_enabled = true
-	cam.position_smoothing_speed = 8.0
-	cam.zoom = Vector2(1.4, 1.4)
-	add_child(cam)
+	_cam = Camera2D.new()
+	_cam.position_smoothing_enabled = true
+	_cam.position_smoothing_speed = 8.0
+	_cam.zoom = Vector2(1.4, 1.4)
+	add_child(_cam)
 
 	recalculate_stats()
 	hp = max_hp
@@ -345,10 +350,46 @@ func on_enemy_killed(is_rare: bool, xp_override: int = -1) -> void:
 	rpg_state_changed.emit()
 
 
+func _process(delta: float) -> void:
+	if _hurt_flash_timer > 0.0:
+		_hurt_flash_timer -= delta
+		if _hurt_flash_timer <= 0.0 and is_instance_valid(_body_node):
+			_body_node.modulate = Color.WHITE
+
+	if _shake_timer > 0.0 and is_instance_valid(_cam):
+		_shake_timer -= delta
+		var strength := _shake_intensity * clampf(_shake_timer / 0.14, 0.0, 1.0)
+		_cam.offset = Vector2(randf_range(-strength, strength), randf_range(-strength, strength))
+		if _shake_timer <= 0.0:
+			_cam.offset = Vector2.ZERO
+
+
+func shake(intensity: float, duration: float = 0.14) -> void:
+	_shake_intensity = maxf(_shake_intensity, intensity)
+	_shake_timer = maxf(_shake_timer, duration)
+
+
+func trigger_hitstop(duration: float = 0.04) -> void:
+	if _hitstop_active or not is_inside_tree():
+		return
+	_hitstop_active = true
+	Engine.time_scale = 0.08
+	get_tree().create_timer(duration, true, false, true).timeout.connect(func() -> void:
+		Engine.time_scale = 1.0
+		_hitstop_active = false
+	)
+
+
 func take_damage(raw_phys: float) -> void:
 	var dr := DamagePipeline.calculate_armour_dr(armour, raw_phys)
 	var taken_mult := stats.get_stat("DAMAGE_TAKEN", 1.0)
-	hp -= raw_phys * (1.0 - dr) * taken_mult
+	var final_dmg := raw_phys * (1.0 - dr) * taken_mult
+	hp -= final_dmg
+	if is_instance_valid(_body_node):
+		_body_node.modulate = Color(1.0, 0.35, 0.35)
+		_hurt_flash_timer = 0.12
+	shake(4.5, 0.14)
+	FloatingText.spawn(get_parent(), global_position, "-%d" % int(roundf(final_dmg)), Color(1.0, 0.3, 0.3), 14)
 	if hp <= 0.0:
 		hp = max_hp
 		mana = max_mana

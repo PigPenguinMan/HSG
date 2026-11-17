@@ -64,6 +64,7 @@ static func calculate_hit(
 		"total_hit_damage": final_phys + final_fire,
 		"bleed_dps": bleed_dps,
 		"ignite_dps": ignite_dps,
+		"is_crit": is_crit and not no_crit_flag,
 	}
 
 

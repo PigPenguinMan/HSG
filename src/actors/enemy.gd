@@ -16,6 +16,7 @@ var armour: float = 20.0
 var evasion: float = 10.0
 var body_size: float = 18.0
 var base_color: Color = Color(0.65, 0.22, 0.22)
+var knockback_resist: float = 0.0
 
 var bleed_dps: float = 0.0
 var bleed_timer: float = 0.0
@@ -25,6 +26,7 @@ var _seen_shot_groups: Dictionary = {}
 var _visual: ColorRect
 var _hp_bar: ColorRect
 var _flash_timer: float = 0.0
+var _knockback_vel: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -68,6 +70,7 @@ func _setup_stats() -> void:
 		armour = 60.0
 		body_size = 24.0
 		xp_reward = 90
+		knockback_resist = 0.5
 		base_color = Color(0.85, 0.65, 0.15)
 
 
@@ -76,6 +79,8 @@ func _physics_process(delta: float) -> void:
 		_flash_timer -= delta
 		if _flash_timer <= 0.0:
 			_visual.color = base_color
+
+	_knockback_vel = _knockback_vel.move_toward(Vector2.ZERO, 950.0 * delta)
 
 	if bleed_timer > 0.0:
 		bleed_timer -= delta
@@ -101,10 +106,12 @@ func _physics_process(delta: float) -> void:
 ## Default melee chase AI. Bosses override this.
 func _ai(_delta: float, player: Node2D, to_player: Vector2) -> void:
 	if to_player.length() > 26.0:
-		velocity = to_player.normalized() * move_speed
+		velocity = to_player.normalized() * move_speed + _knockback_vel
 		move_and_slide()
 	else:
-		velocity = Vector2.ZERO
+		velocity = _knockback_vel
+		if _knockback_vel.length() > 5.0:
+			move_and_slide()
 		if attack_cooldown <= 0.0 and player.has_method("take_damage"):
 			attack_cooldown = 1.1
 			player.take_damage(attack_damage)
@@ -118,9 +125,28 @@ func take_hit(hit_result: Dictionary, shot_group_id: int = 0) -> bool:
 
 	aggro = true
 	var dmg: float = float(hit_result.get("total_hit_damage", 10.0))
+	var is_crit: bool = bool(hit_result.get("is_crit", false))
 	hp -= dmg
 	_visual.color = Color(1.0, 1.0, 1.0)
 	_flash_timer = 0.09
+
+	var dmg_text := "%d!" % int(roundf(dmg)) if is_crit else "%d" % int(roundf(dmg))
+	var txt_col := Color(1.0, 0.85, 0.2) if is_crit else Color(0.95, 0.95, 0.95)
+	FloatingText.spawn(get_parent(), global_position, dmg_text, txt_col, 16 if is_crit else 12)
+	_spawn_hit_sparks(is_crit)
+
+	var player := get_tree().get_first_node_in_group("player") as Player
+	if player != null:
+		var push_dir := (global_position - player.global_position).normalized()
+		_knockback_vel = push_dir * (185.0 if is_crit else 120.0) * (1.0 - knockback_resist)
+		if hp <= 0.0:
+			player.shake(4.0, 0.14)
+			player.trigger_hitstop(0.045)
+		elif is_crit:
+			player.shake(3.0, 0.11)
+			player.trigger_hitstop(0.032)
+		else:
+			player.shake(1.6, 0.08)
 
 	var incoming_bleed: float = float(hit_result.get("bleed_dps", 0.0))
 	if incoming_bleed > bleed_dps:
@@ -131,6 +157,26 @@ func take_hit(hit_result: Dictionary, shot_group_id: int = 0) -> bool:
 	if hp <= 0.0:
 		_die()
 	return true
+
+
+func _spawn_hit_sparks(is_crit: bool) -> void:
+	var parent := get_parent()
+	if parent == null:
+		return
+	var count := 5 if is_crit else 3
+	for _i in range(count):
+		var spark := ColorRect.new()
+		spark.size = Vector2(4, 4)
+		spark.position = global_position - Vector2(2, 2)
+		spark.color = Color(1.0, 0.85, 0.25) if is_crit else Color(1.0, 0.45, 0.35)
+		spark.z_index = 15
+		parent.add_child(spark)
+		var dir := Vector2.from_angle(randf() * TAU) * randf_range(18.0, 38.0)
+		var tw := spark.create_tween()
+		tw.set_parallel(true)
+		tw.tween_property(spark, "position", spark.position + dir, 0.14)
+		tw.tween_property(spark, "modulate:a", 0.0, 0.14)
+		tw.finished.connect(spark.queue_free)
 
 
 func _update_hp_bar() -> void:

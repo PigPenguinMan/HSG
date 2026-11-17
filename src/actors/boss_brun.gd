@@ -22,6 +22,7 @@ func _setup_stats() -> void:
 	armour = 90.0
 	body_size = 38.0
 	xp_reward = 300
+	knockback_resist = 0.85
 	base_color = Color(0.55, 0.14, 0.18)
 
 
@@ -115,6 +116,8 @@ func _execute_leap_slam(player: Node2D) -> void:
 		_telegraph_node.queue_free()
 		_telegraph_node = null
 	global_position = _target_pos
+	if player is Player:
+		(player as Player).shake(8.0, 0.22)
 	if global_position.distance_to(player.global_position) <= 80.0 and player.has_method("take_damage"):
 		player.take_damage(attack_damage * 1.8)
 
