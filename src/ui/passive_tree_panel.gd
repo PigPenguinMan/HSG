@@ -76,7 +76,7 @@ func _on_node_hovered(node_data: Dictionary) -> void:
 		color = "#ff6655"
 	var lines: Array[String] = ["[color=%s][b]%s[/b] (%s)[/color]" % [color, str(node_data.get("name", "")), ntype]]
 	for s in node_data.get("stats", []):
-		lines.append("• %s %s %s" % [str(s.get("stat")), str(s.get("modType")), str(s.get("value"))])
+		lines.append("• " + StatTypes.format_stat(str(s.get("stat")), str(s.get("modType", "FLAT")), float(s.get("value", 0))))
 	_tooltip_label.text = "\n".join(lines)
 
 

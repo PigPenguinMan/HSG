@@ -234,9 +234,9 @@ func _format_tooltip(item: Dictionary) -> String:
 		hex = "#ffdd55"
 	var lines: Array[String] = ["[color=%s][b]%s[/b][/color] (iLvl %d)" % [hex, _short_item_name(item), int(item.get("itemLevel", 1))]]
 	for p in item.get("prefixes", []):
-		lines.append("[color=#aaccff]• [접두] %s +%s[/color]" % [p["stat"], p["value"]])
+		lines.append("[color=#aaccff]• [접두] %s[/color]" % StatTypes.format_stat(str(p["stat"]), str(p.get("modType", "FLAT")), float(p["value"])))
 	for s in item.get("suffixes", []):
-		lines.append("[color=#ccffaa]• [접미] %s +%s[/color]" % [s["stat"], s["value"]])
+		lines.append("[color=#ccffaa]• [접미] %s[/color]" % StatTypes.format_stat(str(s["stat"]), str(s.get("modType", "FLAT")), float(s["value"])))
 	if item.get("prefixes", []).is_empty() and item.get("suffixes", []).is_empty():
 		lines.append("[color=#888888]옵션 없음 (혈석으로 제작 가능)[/color]")
 	return "\n".join(lines)

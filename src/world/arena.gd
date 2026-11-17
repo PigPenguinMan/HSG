@@ -664,9 +664,9 @@ func _drop_item(pos: Vector2, force_rare: bool) -> void:
 func _on_loot_picked_up(item: Dictionary) -> void:
 	var mod_texts: Array[String] = []
 	for p in item.get("prefixes", []):
-		mod_texts.append("%s +%s" % [p["stat"], p["value"]])
+		mod_texts.append(StatTypes.format_stat(str(p["stat"]), str(p.get("modType", "FLAT")), float(p["value"])))
 	for s in item.get("suffixes", []):
-		mod_texts.append("%s +%s" % [s["stat"], s["value"]])
+		mod_texts.append(StatTypes.format_stat(str(s["stat"]), str(s.get("modType", "FLAT")), float(s["value"])))
 	_push_log("%s (%s)" % [item.get("baseId", "item"), ", ".join(mod_texts) if not mod_texts.is_empty() else "일반"])
 
 
