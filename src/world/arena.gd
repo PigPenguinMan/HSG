@@ -657,18 +657,17 @@ func _drop_item(pos: Vector2, force_rare: bool) -> void:
 	drop.item_data = item
 	drop.position = pos
 	drop.picked_up.connect(_on_loot_picked_up)
+	drop.pickup_blocked.connect(func() -> void: _push_log("[가방 가득참] 인벤토리가 가득 차서 주울 수 없습니다."))
 	_zone_root.call_deferred("add_child", drop)
 
 
 func _on_loot_picked_up(item: Dictionary) -> void:
-	var added := _player.add_item_to_inventory(item)
 	var mod_texts: Array[String] = []
 	for p in item.get("prefixes", []):
 		mod_texts.append("%s +%s" % [p["stat"], p["value"]])
 	for s in item.get("suffixes", []):
 		mod_texts.append("%s +%s" % [s["stat"], s["value"]])
-	var prefix_note := "" if added else "[가방 가득참] "
-	_push_log("%s%s (%s)" % [prefix_note, item.get("baseId", "item"), ", ".join(mod_texts) if not mod_texts.is_empty() else "일반"])
+	_push_log("%s (%s)" % [item.get("baseId", "item"), ", ".join(mod_texts) if not mod_texts.is_empty() else "일반"])
 
 
 func _push_log(msg: String) -> void:

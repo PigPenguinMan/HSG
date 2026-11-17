@@ -2,6 +2,7 @@ class_name LootDrop
 extends Area2D
 
 signal picked_up(item: Dictionary)
+signal pickup_blocked()
 
 var item_data: Dictionary = {}
 
@@ -44,9 +45,12 @@ func _ready() -> void:
 
 
 func _on_body_entered(body: Node) -> void:
-	if body.is_in_group("player"):
-		picked_up.emit(item_data)
-		queue_free()
+	if body is Player:
+		if body.add_item_to_inventory(item_data):
+			picked_up.emit(item_data)
+			queue_free()
+		else:
+			pickup_blocked.emit()
 
 
 func _rarity_color(rarity: int) -> Color:
