@@ -28,6 +28,7 @@ var armour: float = 80.0
 var move_speed: float = 210.0
 var flask_charges: int = 3
 var ui_blocking_input: bool = false
+var in_town: bool = false
 
 var equipment: Dictionary = {
 	"WEAPON": null,
@@ -57,7 +58,7 @@ var _body_node: Node2D
 func _ready() -> void:
 	add_to_group("player")
 	collision_layer = 1
-	collision_mask = 2
+	collision_mask = 2 | 4
 
 	passive_tree.load_from_json_file("res://data/passive_tree.json")
 	item_gen.load_affixes_from_json_file("res://data/affixes.json")
@@ -244,12 +245,13 @@ func _physics_process(delta: float) -> void:
 	var atk_speed_mult: float = stats.get_stat("ATTACK_SPEED", 1.0)
 	var cd_scale: float = 1.0 / maxf(0.5, atk_speed_mult)
 
-	if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and _attack_cd <= 0.0:
-		if _try_spend_resource(4.0):
-			_use_crimson_flurry(mouse_dir, cd_scale)
-	elif Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT) and _attack_cd <= 0.0:
-		if _try_spend_resource(8.0):
-			_use_piercing_fang(mouse_dir, cd_scale)
+	if not in_town:
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and _attack_cd <= 0.0:
+			if _try_spend_resource(4.0):
+				_use_crimson_flurry(mouse_dir, cd_scale)
+		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT) and _attack_cd <= 0.0:
+			if _try_spend_resource(8.0):
+				_use_piercing_fang(mouse_dir, cd_scale)
 
 	if Input.is_key_pressed(KEY_1) and flask_charges > 0 and hp < max_hp:
 		flask_charges -= 1
@@ -327,9 +329,9 @@ func _use_piercing_fang(aim_dir: Vector2, cd_scale: float) -> void:
 		proj.global_position = global_position + proj.direction * 14.0
 
 
-func on_enemy_killed(is_rare: bool) -> void:
+func on_enemy_killed(is_rare: bool, xp_override: int = -1) -> void:
 	flask_charges = mini(5, flask_charges + (2 if is_rare else 1))
-	var gained_xp := 90 if is_rare else 25
+	var gained_xp := xp_override if xp_override >= 0 else (90 if is_rare else 25)
 	xp += gained_xp
 	while xp >= xp_to_next and level < 20:
 		xp -= xp_to_next
@@ -350,7 +352,7 @@ func take_damage(raw_phys: float) -> void:
 	if hp <= 0.0:
 		hp = max_hp
 		mana = max_mana
-		global_position = Vector2.ZERO
+		flask_charges = 5
 		player_died.emit()
 	_emit_stats()
 

@@ -80,3 +80,12 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
   - **사망/하드코어**: 일반 모드 기본(Act 1 손실 0%, Act 2~3 5%, 맵 10%) + v0.2 이후 하드코어 옵션 추가
 - **영문 고유명사 정리 완료**: `3.6` 지적 사항에 따라 `Keystone`/`Ascendancy`/`Chaos Orb`/`Cyclone`/`Lacerate` 등 PoE1 고유 영문명을 자체 IP 영문명(`Apex Node`, `Bloodline`, `Bloodstone of ...`, `Whirlclaw`, `Crimson Flurry` 등)으로 전면 교체했습니다.
 - **기술 스택 확정 및 Phase 0 착수**: **Godot 4 (GDScript)**로 확정하고, `project.godot` 및 `src/core/` 순수 계산 라이브러리 + `data/` JSON + `tests/` 단위 테스트 세팅을 완료했습니다.
+
+### 4.3 Phase 1~3 구현 현황 (Godot 4.7, GL Compatibility)
+- **Phase 1 (전투 프로토타입)**: 늑대 플레이어(`src/actors/player.gd`), 근접 출혈 부채꼴(핏빛 난무) & 투사체 샷건 방지(관통 송곳니), 질주, 물약, 적 AI(`src/actors/enemy.gd`), 드롭 빔(`src/world/loot_drop.gd`) 구현 완료.
+- **Phase 2 (인벤토리·크래프팅·패시브 트리 UI)**: 6장비 슬롯 + 24칸 가방 + 혈석 5종 크래프팅(`src/ui/inventory_panel.gd`), 팬/줌 패시브 트리(`src/ui/passive_tree_panel.gd`), 레벨업/XP/피의 갈증 자원 안전 규칙 구현 완료.
+- **Phase 3 (Act 1 수직 슬라이스)**:
+  - 데이터 기반 구역 전환(`data/act1_zones.json`, `src/world/arena.gd`): **잿빛 송곳니 야영지(거점)** ↔ **버려진 사냥터** ↔ **피에 젖은 진흙 늪** ↔ **무너진 곰 부족의 성채(보스방)**
+  - 마을 NPC 3인(`E`키 상호작용): **브람**(장비 분해/초보 장비 지원), **리아**(물약 충전/변이→단조 교환), **호르**(보스 퀘스트 & 패시브 +2/희귀 무기 보상)
+  - 체크포인트 저장, 발견한 거점 이동진 순간이동, 사망 시 Act 1 경험치 손실 0% 부활
+  - 액트 1 보스 **타락한 대족장, 철갑 브룬**(`src/actors/boss_brun.gd`, `src/actors/enemy_projectile.gd`): 0.95초 바닥 예고 후 도약 강타, 3방향 핏빛 충격파, HP 50% 이하 광폭화 돌진
