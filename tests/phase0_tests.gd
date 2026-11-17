@@ -55,13 +55,16 @@ static func _test_passive_tree_bfs_refund() -> String:
 	var loaded := tree.load_from_json_file("res://data/passive_tree.json")
 	assert(loaded, "Failed to load res://data/passive_tree.json")
 
+	# Non-adjacent node must be rejected (Lone Wolf only connects to node_ms_01)
+	assert(not tree.allocate("node_apex_lone_wolf"), "Should reject non-adjacent Lone Wolf")
 	assert(tree.allocate("node_life_01"), "Should allocate node_life_01")
+	assert(tree.allocate("node_ms_01"), "Should allocate node_ms_01")
 	assert(tree.allocate("node_apex_lone_wolf"), "Should allocate Lone Wolf")
-	# Cannot refund node_life_01 because node_apex_lone_wolf depends on it
-	assert(not tree.can_refund("node_life_01"), "Should block refunding bridge node")
-	# Refund Lone Wolf first, then node_life_01 becomes refundable
+	# Cannot refund node_ms_01 because node_apex_lone_wolf depends on it
+	assert(not tree.can_refund("node_ms_01"), "Should block refunding bridge node")
+	# Refund Lone Wolf first, then node_ms_01 becomes refundable
 	assert(tree.refund("node_apex_lone_wolf"), "Should refund Lone Wolf")
-	assert(tree.can_refund("node_life_01"), "Should allow refunding node_life_01 now")
+	assert(tree.can_refund("node_ms_01"), "Should allow refunding node_ms_01 now")
 	return "[PASS] PassiveTreeGraph: Neighbor allocate + BFS orphan-safe refund"
 
 
