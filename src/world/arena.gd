@@ -24,6 +24,7 @@ var _near_npc: Dictionary = {}
 var _near_waypoint: bool = false
 
 const SkillPanelScript := preload("res://src/ui/skill_panel.gd")
+const DarkFantasyThemeScript := preload("res://src/ui/dark_fantasy_theme.gd")
 
 var _inv_panel: InventoryPanel
 var _tree_panel: PassiveTreePanel
@@ -36,6 +37,14 @@ var _dialog_buttons: VBoxContainer
 var _boss_bar_box: VBoxContainer
 var _boss_hp_bar: ColorRect
 
+var _hp_orb_fill: ColorRect
+var _hp_orb_label: Label
+var _mana_orb_fill: ColorRect
+var _mana_orb_label: Label
+var _xp_bar_fill: ColorRect
+var _flask_badge: Label
+var _skill_bar_labels: Dictionary = {}
+
 
 func _ready() -> void:
 	_item_gen.load_affixes_from_json_file("res://data/affixes.json")
@@ -47,6 +56,7 @@ func _ready() -> void:
 	_player = Player.new()
 	_player.stats_changed.connect(_on_player_stats_changed)
 	_player.player_died.connect(_on_player_died)
+	_player.rpg_state_changed.connect(_refresh_skill_bar)
 	add_child(_player)
 
 	_build_ui()
@@ -66,7 +76,11 @@ func _load_zones() -> void:
 
 
 func _build_ui() -> void:
+	var ui_theme := DarkFantasyThemeScript.build()
+	$HUD/MarginContainer.theme = ui_theme
+
 	var btn_bar := HBoxContainer.new()
+	btn_bar.theme = ui_theme
 	btn_bar.anchor_left = 1.0
 	btn_bar.anchor_right = 1.0
 	btn_bar.offset_left = -390
@@ -96,6 +110,7 @@ func _build_ui() -> void:
 
 	# Boss HP bar (top-center)
 	_boss_bar_box = VBoxContainer.new()
+	_boss_bar_box.theme = ui_theme
 	_boss_bar_box.anchor_left = 0.5
 	_boss_bar_box.anchor_right = 0.5
 	_boss_bar_box.offset_left = -180
@@ -120,22 +135,25 @@ func _build_ui() -> void:
 	_boss_hp_bar.color = Color(0.85, 0.16, 0.16)
 	bar_bg.add_child(_boss_hp_bar)
 
-	# Bottom interaction prompt
+	# Bottom interaction prompt (above skill bar)
 	_prompt_label = Label.new()
 	_prompt_label.anchor_left = 0.5
 	_prompt_label.anchor_right = 0.5
 	_prompt_label.anchor_top = 1.0
 	_prompt_label.anchor_bottom = 1.0
-	_prompt_label.offset_left = -200
-	_prompt_label.offset_right = 200
-	_prompt_label.offset_top = -52
-	_prompt_label.offset_bottom = -20
+	_prompt_label.offset_left = -220
+	_prompt_label.offset_right = 220
+	_prompt_label.offset_top = -126
+	_prompt_label.offset_bottom = -96
 	_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_prompt_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.45))
 	_prompt_label.visible = false
 	hud_layer.add_child(_prompt_label)
 
+	_build_bottom_hud(ui_theme)
+
 	var center := CenterContainer.new()
+	center.theme = ui_theme
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud_layer.add_child(center)
@@ -384,10 +402,9 @@ func _build_checkpoint(pos: Vector2) -> void:
 	col.shape = circle
 	area.add_child(col)
 
-	var vis := ColorRect.new()
-	vis.size = Vector2(22, 22)
-	vis.position = Vector2(-11, -11)
-	vis.color = Color(0.5, 0.5, 0.55)
+	var vis := Sprite2D.new()
+	vis.texture = load("res://assets/sprites/checkpoint.png")
+	vis.modulate = Color(0.65, 0.65, 0.7)
 	area.add_child(vis)
 
 	var lbl := Label.new()
@@ -399,7 +416,7 @@ func _build_checkpoint(pos: Vector2) -> void:
 		if body == _player:
 			_respawn_zone = _current_zone_id
 			_respawn_pos = pos
-			vis.color = Color(1.0, 0.85, 0.25)
+			vis.modulate = Color(1.25, 1.1, 0.75)
 			_push_log("체크포인트 저장됨")
 	)
 	_zone_root.add_child(area)
@@ -703,9 +720,153 @@ func _on_player_died() -> void:
 	call_deferred("_enter_zone", _respawn_zone, _respawn_pos)
 
 
+func _build_bottom_hud(ui_theme: Theme) -> void:
+	var bottom := Control.new()
+	bottom.theme = ui_theme
+	bottom.anchor_top = 1.0
+	bottom.anchor_bottom = 1.0
+	bottom.anchor_right = 1.0
+	bottom.offset_top = -96
+	bottom.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	hud_layer.add_child(bottom)
+
+	var life_orb := _make_orb(Color(0.75, 0.12, 0.16), Color(0.72, 0.48, 0.22))
+	life_orb["frame"].position = Vector2(22, 8)
+	bottom.add_child(life_orb["frame"])
+	_hp_orb_fill = life_orb["fill"]
+	_hp_orb_label = life_orb["label"]
+
+	var mana_orb := _make_orb(Color(0.14, 0.34, 0.78), Color(0.45, 0.58, 0.82))
+	mana_orb["frame"].anchor_left = 1.0
+	mana_orb["frame"].anchor_right = 1.0
+	mana_orb["frame"].offset_left = -100
+	mana_orb["frame"].offset_right = -22
+	mana_orb["frame"].offset_top = 8
+	mana_orb["frame"].offset_bottom = 86
+	bottom.add_child(mana_orb["frame"])
+	_mana_orb_fill = mana_orb["fill"]
+	_mana_orb_label = mana_orb["label"]
+
+	var center_box := VBoxContainer.new()
+	center_box.anchor_left = 0.5
+	center_box.anchor_right = 0.5
+	center_box.offset_left = -260
+	center_box.offset_right = 260
+	center_box.offset_top = 18
+	center_box.add_theme_constant_override("separation", 6)
+	bottom.add_child(center_box)
+
+	var xp_bg := ColorRect.new()
+	xp_bg.custom_minimum_size = Vector2(520, 6)
+	xp_bg.color = Color(0.12, 0.10, 0.14, 0.9)
+	center_box.add_child(xp_bg)
+
+	_xp_bar_fill = ColorRect.new()
+	_xp_bar_fill.size = Vector2(0, 6)
+	_xp_bar_fill.color = Color(0.88, 0.72, 0.26)
+	xp_bg.add_child(_xp_bar_fill)
+
+	var bar := HBoxContainer.new()
+	bar.alignment = BoxContainer.ALIGNMENT_CENTER
+	bar.add_theme_constant_override("separation", 8)
+	center_box.add_child(bar)
+
+	for slot_key in ["LMB", "RMB", "Q", "SPACE"]:
+		var slot_panel := PanelContainer.new()
+		slot_panel.custom_minimum_size = Vector2(104, 46)
+		slot_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		bar.add_child(slot_panel)
+
+		var lbl := Label.new()
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lbl.add_theme_font_size_override("font_size", 11)
+		slot_panel.add_child(lbl)
+		_skill_bar_labels[slot_key] = lbl
+
+	var flask_panel := PanelContainer.new()
+	flask_panel.custom_minimum_size = Vector2(82, 46)
+	flask_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_child(flask_panel)
+
+	_flask_badge = Label.new()
+	_flask_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_flask_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_flask_badge.add_theme_font_size_override("font_size", 11)
+	_flask_badge.text = "[1] 물약\n3/5"
+	flask_panel.add_child(_flask_badge)
+
+	_refresh_skill_bar()
+
+
+func _make_orb(fill_col: Color, border_col: Color) -> Dictionary:
+	var frame := Panel.new()
+	frame.size = Vector2(78, 78)
+	frame.clip_contents = true
+	frame.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.06, 0.05, 0.07, 0.92)
+	sb.border_color = border_col
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(39)
+	frame.add_theme_stylebox_override("panel", sb)
+
+	var fill := ColorRect.new()
+	fill.size = Vector2(78, 78)
+	fill.color = fill_col
+	fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	frame.add_child(fill)
+
+	var lbl := Label.new()
+	lbl.size = Vector2(78, 78)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 12)
+	frame.add_child(lbl)
+
+	return {"frame": frame, "fill": fill, "label": lbl}
+
+
+func _refresh_skill_bar() -> void:
+	if _player == null or _skill_bar_labels.is_empty():
+		return
+	var key_names := {"LMB": "좌클릭", "RMB": "우클릭", "Q": "Q", "SPACE": "Space"}
+	for sk in ["LMB", "RMB", "Q", "SPACE"]:
+		var slot: Dictionary = _player.skill_slots.get(sk, {})
+		var sid := str(slot.get("skill_id", ""))
+		var sname := str(_player.skills_db.get(sid, {}).get("name", sid))
+		var lbl: Label = _skill_bar_labels[sk]
+		lbl.text = "[%s]\n%s" % [key_names[sk], sname]
+
+
 func _on_player_stats_changed(hp: float, max_hp: float, mana: float, max_mana: float, flask: int, lv: int, cur_xp: int, next_xp: int) -> void:
 	var zname := str(_zones.get(_current_zone_id, {}).get("name", _current_zone_id))
 	var pts_text := "  |  [패시브 포인트: %d]" % _player.passive_points if _player.passive_points > 0 else ""
-	hud_label.text = "[%s] Lv.%d (XP %d/%d)%s  |  HP: %d/%d  |  Mana: %d/%d  |  물약(1): %d/5  |  처치: %d\n[WASD] 이동  [좌/우/Q] 스킬  [Space] 질주  [E] 대화/이동진  [I] 인벤  [P] 패시브  [K] 스킬/룬" % [
-		zname, lv, cur_xp, next_xp, pts_text, int(hp), int(max_hp), int(mana), int(max_mana), flask, _kills
+	hud_label.text = "[%s] Lv.%d (XP %d/%d)%s  |  처치: %d\n[WASD] 이동  [E] 대화/이동진  [I] 인벤  [P] 패시브  [K] 스킬/룬" % [
+		zname, lv, cur_xp, next_xp, pts_text, _kills
 	]
+
+	if _hp_orb_fill != null:
+		var hp_ratio := clampf(hp / maxf(1.0, max_hp), 0.0, 1.0)
+		_hp_orb_fill.position.y = 78.0 * (1.0 - hp_ratio)
+		_hp_orb_fill.size.y = 78.0 * hp_ratio
+		_hp_orb_label.text = "%d\n/%d" % [int(hp), int(max_hp)]
+
+	if _mana_orb_fill != null:
+		if _player.stats.has_flag("BLOODTHIRST"):
+			_mana_orb_fill.position.y = 0.0
+			_mana_orb_fill.size.y = 78.0
+			_mana_orb_fill.color = Color(0.28, 0.06, 0.08)
+			_mana_orb_label.text = "피의\n갈증"
+		else:
+			var m_ratio := clampf(mana / maxf(1.0, max_mana), 0.0, 1.0)
+			_mana_orb_fill.color = Color(0.14, 0.34, 0.78)
+			_mana_orb_fill.position.y = 78.0 * (1.0 - m_ratio)
+			_mana_orb_fill.size.y = 78.0 * m_ratio
+			_mana_orb_label.text = "%d\n/%d" % [int(mana), int(max_mana)]
+
+	if _xp_bar_fill != null:
+		_xp_bar_fill.size.x = 520.0 * clampf(float(cur_xp) / float(maxi(1, next_xp)), 0.0, 1.0)
+	if _flask_badge != null:
+		_flask_badge.text = "[1] 물약\n%d/5" % flask

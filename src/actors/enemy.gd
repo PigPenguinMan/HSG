@@ -17,7 +17,7 @@ var evasion: float = 10.0
 var body_size: float = 18.0
 var base_color: Color = Color(0.65, 0.22, 0.22)
 var sprite_path: String = "res://assets/sprites/enemy_feral.png"
-var sprite_scale: float = 1.1
+var sprite_scale: float = 1.0
 var knockback_resist: float = 0.0
 
 var bleed_dps: float = 0.0
@@ -31,6 +31,7 @@ var _visual: Sprite2D
 var _hp_bar: ColorRect
 var _flash_timer: float = 0.0
 var _knockback_vel: Vector2 = Vector2.ZERO
+var _anim_timer: float = 0.0
 
 
 func _ready() -> void:
@@ -54,6 +55,7 @@ func _ready() -> void:
 
 	_visual = Sprite2D.new()
 	_visual.texture = load(sprite_path)
+	_visual.hframes = 2
 	_visual.scale = Vector2(sprite_scale, sprite_scale)
 	add_child(_visual)
 
@@ -75,7 +77,7 @@ func _setup_stats() -> void:
 		xp_reward = 90
 		knockback_resist = 0.5
 		sprite_path = "res://assets/sprites/enemy_rare.png"
-		sprite_scale = 1.2
+		sprite_scale = 1.05
 		base_color = Color(0.85, 0.65, 0.15)
 
 
@@ -84,6 +86,13 @@ func _physics_process(delta: float) -> void:
 		_flash_timer -= delta
 		if _flash_timer <= 0.0:
 			_visual.modulate = Color.WHITE
+
+	_anim_timer += delta
+	if _anim_timer >= 0.22:
+		_anim_timer = 0.0
+		_visual.frame = 1 - _visual.frame
+	if absf(velocity.x) > 5.0:
+		_visual.flip_h = velocity.x < 0.0
 
 	_knockback_vel = _knockback_vel.move_toward(Vector2.ZERO, 950.0 * delta)
 

@@ -59,6 +59,7 @@ var _shake_timer: float = 0.0
 var _hitstop_active: bool = false
 var _hurt_flash_timer: float = 0.0
 var _dash_hit_ids: Dictionary = {}
+var _anim_timer: float = 0.0
 
 var skills_db: Dictionary = {}
 var runes_db: Dictionary = {}
@@ -254,9 +255,17 @@ func _physics_process(delta: float) -> void:
 	velocity = input_dir * move_speed
 	move_and_slide()
 
+	if _body_node is Sprite2D:
+		var spr := _body_node as Sprite2D
+		_anim_timer += delta
+		var interval := 0.16 if input_dir != Vector2.ZERO else 0.42
+		if _anim_timer >= interval:
+			_anim_timer = 0.0
+			spr.frame = 1 - spr.frame
+
 	var mouse_dir := (get_global_mouse_position() - global_position).normalized()
 	if mouse_dir.x != 0.0:
-		_body_node.scale.x = 1.2 if mouse_dir.x >= 0.0 else -1.2
+		_body_node.scale.x = 1.0 if mouse_dir.x >= 0.0 else -1.0
 
 	if Input.is_action_just_pressed("skill_dash") and _dash_cd <= 0.0:
 		_dash_dir = mouse_dir if input_dir == Vector2.ZERO else input_dir
@@ -571,6 +580,7 @@ func _emit_stats() -> void:
 func _build_wolf_pixel_sprite() -> void:
 	var spr := Sprite2D.new()
 	spr.texture = load("res://assets/sprites/wolf_player.png")
-	spr.scale = Vector2(1.2, 1.2)
+	spr.hframes = 2
+	spr.scale = Vector2(1.0, 1.0)
 	add_child(spr)
 	_body_node = spr

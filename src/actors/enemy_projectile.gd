@@ -17,10 +17,9 @@ func _ready() -> void:
 	col.shape = circle
 	add_child(col)
 
-	var vis := ColorRect.new()
-	vis.size = Vector2(12, 12)
-	vis.position = Vector2(-6, -6)
-	vis.color = Color(0.95, 0.18, 0.22)
+	var vis := Sprite2D.new()
+	vis.texture = load("res://assets/sprites/proj_blood.png")
+	vis.rotation = direction.angle()
 	add_child(vis)
 
 	body_entered.connect(_on_body_entered)

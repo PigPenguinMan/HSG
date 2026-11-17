@@ -28,10 +28,12 @@ func _ready() -> void:
 		beam.color = Color(color.r, color.g, color.b, 0.45)
 		add_child(beam)
 
-	var icon := ColorRect.new()
-	icon.size = Vector2(12, 12)
-	icon.position = Vector2(-6, -6)
-	icon.color = color
+	var slot := str(item_data.get("slot", "weapon")).to_lower()
+	if slot.begins_with("ring"):
+		slot = "ring"
+	var tex_path := "res://assets/sprites/loot_%s.png" % slot
+	var icon := Sprite2D.new()
+	icon.texture = load(tex_path if ResourceLoader.exists(tex_path) else "res://assets/sprites/loot_weapon.png")
 	add_child(icon)
 
 	var label := Label.new()

@@ -24,7 +24,7 @@ func _setup_stats() -> void:
 	xp_reward = 300
 	knockback_resist = 0.85
 	sprite_path = "res://assets/sprites/boss_brun.png"
-	sprite_scale = 1.4
+	sprite_scale = 1.1
 	base_color = Color(0.55, 0.14, 0.18)
 
 

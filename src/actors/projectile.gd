@@ -22,20 +22,8 @@ func _ready() -> void:
 	shape.shape = circle
 	add_child(shape)
 
-	var visual := Polygon2D.new()
-	if aoe_radius > 0.0:
-		var pts := PackedVector2Array()
-		for i in range(10):
-			pts.append(Vector2.from_angle(TAU * float(i) / 10.0) * 8.0)
-		visual.polygon = pts
-	else:
-		visual.polygon = PackedVector2Array([
-			Vector2(8, 0),
-			Vector2(-5, -4),
-			Vector2(-3, 0),
-			Vector2(-5, 4),
-		])
-	visual.color = color
+	var visual := Sprite2D.new()
+	visual.texture = load("res://assets/sprites/proj_orb.png" if aoe_radius > 0.0 else "res://assets/sprites/proj_fang.png")
 	visual.rotation = direction.angle()
 	add_child(visual)
 
