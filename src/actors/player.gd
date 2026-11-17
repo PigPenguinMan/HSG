@@ -253,7 +253,7 @@ func _physics_process(delta: float) -> void:
 
 	var mouse_dir := (get_global_mouse_position() - global_position).normalized()
 	if mouse_dir.x != 0.0:
-		_body_node.scale.x = 1.0 if mouse_dir.x >= 0.0 else -1.0
+		_body_node.scale.x = 1.2 if mouse_dir.x >= 0.0 else -1.2
 
 	if Input.is_action_just_pressed("skill_dash") and _dash_cd <= 0.0:
 		_dash_dir = mouse_dir if input_dir == Vector2.ZERO else input_dir
@@ -566,35 +566,8 @@ func _emit_stats() -> void:
 
 
 func _build_wolf_pixel_sprite() -> void:
-	_body_node = Node2D.new()
-	add_child(_body_node)
-
-	var torso := ColorRect.new()
-	torso.size = Vector2(16, 18)
-	torso.position = Vector2(-8, -9)
-	torso.color = Color(0.55, 0.58, 0.65)
-	_body_node.add_child(torso)
-
-	var ear_l := ColorRect.new()
-	ear_l.size = Vector2(4, 5)
-	ear_l.position = Vector2(-7, -14)
-	ear_l.color = Color(0.42, 0.45, 0.52)
-	_body_node.add_child(ear_l)
-
-	var ear_r := ColorRect.new()
-	ear_r.size = Vector2(4, 5)
-	ear_r.position = Vector2(3, -14)
-	ear_r.color = Color(0.42, 0.45, 0.52)
-	_body_node.add_child(ear_r)
-
-	var eye := ColorRect.new()
-	eye.size = Vector2(3, 2)
-	eye.position = Vector2(3, -5)
-	eye.color = Color(0.95, 0.25, 0.25)
-	_body_node.add_child(eye)
-
-	var tail := ColorRect.new()
-	tail.size = Vector2(7, 4)
-	tail.position = Vector2(-14, 2)
-	tail.color = Color(0.45, 0.48, 0.55)
-	_body_node.add_child(tail)
+	var spr := Sprite2D.new()
+	spr.texture = load("res://assets/sprites/wolf_player.png")
+	spr.scale = Vector2(1.2, 1.2)
+	add_child(spr)
+	_body_node = spr

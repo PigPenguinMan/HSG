@@ -297,22 +297,13 @@ func _enter_zone(zone_id: String, spawn_pos: Vector2) -> void:
 
 
 func _build_ground(sz: Vector2, base_col: Color) -> void:
-	var bg := ColorRect.new()
+	var bg := TextureRect.new()
+	bg.texture = load("res://assets/sprites/ground_tile.png")
+	bg.stretch_mode = TextureRect.STRETCH_TILE
 	bg.size = sz
-	bg.color = base_col
+	bg.modulate = Color(base_col.r * 5.2, base_col.g * 5.2, base_col.b * 5.2, 1.0)
 	bg.z_index = -12
 	_zone_root.add_child(bg)
-
-	var step := 128.0
-	for x in range(0, int(sz.x), int(step)):
-		for y in range(0, int(sz.y), int(step)):
-			if ((x / int(step)) + (y / int(step))) % 2 == 0:
-				var patch := ColorRect.new()
-				patch.size = Vector2(step - 4, step - 4)
-				patch.position = Vector2(x + 2, y + 2)
-				patch.color = Color(base_col.r + 0.02, base_col.g + 0.02, base_col.b + 0.02)
-				patch.z_index = -11
-				_zone_root.add_child(patch)
 
 
 func _build_walls(sz: Vector2) -> void:
@@ -355,10 +346,9 @@ func _build_exit(ex: Dictionary) -> void:
 	col.shape = circle
 	area.add_child(col)
 
-	var vis := ColorRect.new()
-	vis.size = Vector2(36, 36)
-	vis.position = Vector2(-18, -18)
-	vis.color = Color(0.3, 0.7, 0.95, 0.7)
+	var vis := Sprite2D.new()
+	vis.texture = load("res://assets/sprites/portal.png")
+	vis.scale = Vector2(1.5, 1.5)
 	area.add_child(vis)
 
 	var lbl := Label.new()
@@ -421,10 +411,9 @@ func _build_waypoint(pos: Vector2) -> void:
 	col.shape = circle
 	area.add_child(col)
 
-	var vis := ColorRect.new()
-	vis.size = Vector2(28, 28)
-	vis.position = Vector2(-14, -14)
-	vis.color = Color(0.45, 0.85, 1.0, 0.85)
+	var vis := Sprite2D.new()
+	vis.texture = load("res://assets/sprites/waypoint.png")
+	vis.scale = Vector2(1.3, 1.3)
 	area.add_child(vis)
 
 	var lbl := Label.new()
@@ -448,7 +437,6 @@ func _build_waypoint(pos: Vector2) -> void:
 
 func _build_npc(npc: Dictionary) -> void:
 	var pos := Vector2(float(npc["pos"][0]), float(npc["pos"][1]))
-	var c: Array = npc["color"]
 	var area := Area2D.new()
 	area.position = pos
 	area.collision_layer = 0
@@ -460,10 +448,9 @@ func _build_npc(npc: Dictionary) -> void:
 	col.shape = circle
 	area.add_child(col)
 
-	var vis := ColorRect.new()
-	vis.size = Vector2(22, 26)
-	vis.position = Vector2(-11, -13)
-	vis.color = Color(float(c[0]), float(c[1]), float(c[2]))
+	var vis := Sprite2D.new()
+	vis.texture = load("res://assets/sprites/npc_%s.png" % str(npc["id"]))
+	vis.scale = Vector2(1.25, 1.25)
 	area.add_child(vis)
 
 	var lbl := Label.new()

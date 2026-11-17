@@ -23,6 +23,8 @@ func _setup_stats() -> void:
 	body_size = 38.0
 	xp_reward = 300
 	knockback_resist = 0.85
+	sprite_path = "res://assets/sprites/boss_brun.png"
+	sprite_scale = 1.4
 	base_color = Color(0.55, 0.14, 0.18)
 
 

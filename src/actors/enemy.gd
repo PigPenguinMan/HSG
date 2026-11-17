@@ -16,6 +16,8 @@ var armour: float = 20.0
 var evasion: float = 10.0
 var body_size: float = 18.0
 var base_color: Color = Color(0.65, 0.22, 0.22)
+var sprite_path: String = "res://assets/sprites/enemy_feral.png"
+var sprite_scale: float = 1.1
 var knockback_resist: float = 0.0
 
 var bleed_dps: float = 0.0
@@ -25,7 +27,7 @@ var ignite_timer: float = 0.0
 var attack_cooldown: float = 0.0
 var aggro: bool = false
 var _seen_shot_groups: Dictionary = {}
-var _visual: ColorRect
+var _visual: Sprite2D
 var _hp_bar: ColorRect
 var _flash_timer: float = 0.0
 var _knockback_vel: Vector2 = Vector2.ZERO
@@ -50,10 +52,9 @@ func _ready() -> void:
 	col.shape = rect
 	add_child(col)
 
-	_visual = ColorRect.new()
-	_visual.size = Vector2(body_size, body_size)
-	_visual.position = Vector2(-body_size * 0.5, -body_size * 0.5)
-	_visual.color = base_color
+	_visual = Sprite2D.new()
+	_visual.texture = load(sprite_path)
+	_visual.scale = Vector2(sprite_scale, sprite_scale)
 	add_child(_visual)
 
 	_hp_bar = ColorRect.new()
@@ -73,6 +74,8 @@ func _setup_stats() -> void:
 		body_size = 24.0
 		xp_reward = 90
 		knockback_resist = 0.5
+		sprite_path = "res://assets/sprites/enemy_rare.png"
+		sprite_scale = 1.2
 		base_color = Color(0.85, 0.65, 0.15)
 
 
@@ -80,7 +83,7 @@ func _physics_process(delta: float) -> void:
 	if _flash_timer > 0.0:
 		_flash_timer -= delta
 		if _flash_timer <= 0.0:
-			_visual.color = base_color
+			_visual.modulate = Color.WHITE
 
 	_knockback_vel = _knockback_vel.move_toward(Vector2.ZERO, 950.0 * delta)
 
@@ -137,7 +140,7 @@ func take_hit(hit_result: Dictionary, shot_group_id: int = 0) -> bool:
 	var dmg: float = float(hit_result.get("total_hit_damage", 10.0))
 	var is_crit: bool = bool(hit_result.get("is_crit", false))
 	hp -= dmg
-	_visual.color = Color(1.0, 1.0, 1.0)
+	_visual.modulate = Color(2.5, 2.5, 2.5)
 	_flash_timer = 0.09
 
 	var dmg_text := "%d!" % int(roundf(dmg)) if is_crit else "%d" % int(roundf(dmg))
