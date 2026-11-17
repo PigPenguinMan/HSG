@@ -55,6 +55,7 @@ const STAT_LABELS: Dictionary = {
 	"EVASION": "회피",
 	"ACCURACY": "명중률",
 	"PHYSICAL_DAMAGE": "물리 피해",
+	"ATTACK_DAMAGE": "공격 피해",
 	"ADDED_PHYSICAL_DAMAGE": "추가 물리 피해",
 	"ATTACK_SPEED": "공격 속도",
 	"MOVEMENT_SPEED": "이동 속도",

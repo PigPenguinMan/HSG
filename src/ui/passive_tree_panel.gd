@@ -85,7 +85,7 @@ class _TreeCanvas extends Control:
 
 	var player: Player
 	var pan_offset: Vector2 = Vector2.ZERO
-	var zoom_scale: float = 1.0
+	var zoom_scale: float = 0.8
 	var _dragging: bool = false
 	var _hovered_id: String = ""
 
@@ -95,10 +95,10 @@ class _TreeCanvas extends Control:
 		if event is InputEventMouseButton:
 			var mb := event as InputEventMouseButton
 			if mb.button_index == MOUSE_BUTTON_WHEEL_UP and mb.pressed:
-				zoom_scale = clampf(zoom_scale + 0.1, 0.5, 2.0)
+				zoom_scale = clampf(zoom_scale + 0.1, 0.45, 2.0)
 				queue_redraw()
 			elif mb.button_index == MOUSE_BUTTON_WHEEL_DOWN and mb.pressed:
-				zoom_scale = clampf(zoom_scale - 0.1, 0.5, 2.0)
+				zoom_scale = clampf(zoom_scale - 0.1, 0.45, 2.0)
 				queue_redraw()
 			elif mb.button_index == MOUSE_BUTTON_MIDDLE:
 				_dragging = mb.pressed

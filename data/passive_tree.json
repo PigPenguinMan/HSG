@@ -1,158 +1,1347 @@
 {
-  "version": "0.1.0",
+  "version": "0.1.1",
   "nodes": [
     {
       "id": "node_wolf_start",
       "name": "늑대 부족의 기원",
       "type": "START",
       "race": "WOLF",
-      "position": { "x": 0, "y": 0 },
+      "position": {
+        "x": 0,
+        "y": 0
+      },
       "stats": [],
-      "adjacentIds": ["node_dex_01", "node_life_01", "node_phys_01"]
+      "adjacentIds": [
+        "node_dex_01",
+        "node_life_01",
+        "node_phys_01"
+      ]
     },
     {
       "id": "node_dex_01",
       "name": "날카로운 감각",
       "type": "MINOR",
-      "position": { "x": 90, "y": -45 },
+      "position": {
+        "x": 90,
+        "y": -45
+      },
       "stats": [
-        { "stat": "DEX", "modType": "FLAT", "value": 10 },
-        { "stat": "ACCURACY", "modType": "INCREASED", "value": 12 }
+        {
+          "stat": "DEX",
+          "modType": "FLAT",
+          "value": 10
+        },
+        {
+          "stat": "ACCURACY",
+          "modType": "INCREASED",
+          "value": 12
+        }
       ],
-      "adjacentIds": ["node_wolf_start", "node_atk_spd_01", "node_life_01"]
+      "adjacentIds": [
+        "node_wolf_start",
+        "node_atk_spd_01",
+        "node_life_01",
+        "node_str_dex_01"
+      ]
     },
     {
       "id": "node_atk_spd_01",
       "name": "민첩한 발톱",
       "type": "MINOR",
-      "position": { "x": 170, "y": -85 },
+      "position": {
+        "x": 170,
+        "y": -85
+      },
       "stats": [
-        { "stat": "ATTACK_SPEED", "modType": "INCREASED", "value": 8 },
-        { "stat": "DEX", "modType": "FLAT", "value": 8 }
+        {
+          "stat": "ATTACK_SPEED",
+          "modType": "INCREASED",
+          "value": 8
+        },
+        {
+          "stat": "DEX",
+          "modType": "FLAT",
+          "value": 8
+        }
       ],
-      "adjacentIds": ["node_dex_01", "node_notable_fang", "node_crit_01"]
+      "adjacentIds": [
+        "node_dex_01",
+        "node_notable_fang",
+        "node_crit_01",
+        "node_proj_01"
+      ]
     },
     {
       "id": "node_crit_01",
       "name": "약점 포착",
       "type": "MINOR",
-      "position": { "x": 250, "y": -45 },
+      "position": {
+        "x": 250,
+        "y": -45
+      },
       "stats": [
-        { "stat": "CRIT_CHANCE", "modType": "INCREASED", "value": 25 },
-        { "stat": "CRIT_MULTIPLIER", "modType": "FLAT", "value": 15 }
+        {
+          "stat": "CRIT_CHANCE",
+          "modType": "INCREASED",
+          "value": 25
+        },
+        {
+          "stat": "CRIT_MULTIPLIER",
+          "modType": "FLAT",
+          "value": 15
+        }
       ],
-      "adjacentIds": ["node_atk_spd_01", "node_apex_feral_precision"]
+      "adjacentIds": [
+        "node_atk_spd_01",
+        "node_apex_feral_precision",
+        "node_crit_02"
+      ]
     },
     {
       "id": "node_notable_fang",
       "name": "굶주린 송곳니",
       "type": "NOTABLE",
-      "position": { "x": 230, "y": -155 },
+      "position": {
+        "x": 230,
+        "y": -155
+      },
       "stats": [
-        { "stat": "PHYSICAL_DAMAGE", "modType": "INCREASED", "value": 24 },
-        { "stat": "BLEED_CHANCE", "modType": "FLAT", "value": 20 }
+        {
+          "stat": "PHYSICAL_DAMAGE",
+          "modType": "INCREASED",
+          "value": 24
+        },
+        {
+          "stat": "BLEED_CHANCE",
+          "modType": "FLAT",
+          "value": 20
+        }
       ],
-      "adjacentIds": ["node_atk_spd_01", "node_apex_feral_precision"]
+      "adjacentIds": [
+        "node_atk_spd_01",
+        "node_apex_feral_precision",
+        "node_proj_01",
+        "node_notable_wind_fang"
+      ]
     },
     {
       "id": "node_apex_feral_precision",
       "name": "야수의 직감",
       "type": "APEX",
-      "position": { "x": 330, "y": -120 },
+      "position": {
+        "x": 330,
+        "y": -120
+      },
       "stats": [
-        { "stat": "ALWAYS_HITS", "modType": "FLAG", "value": 1 },
-        { "stat": "CANNOT_CRIT", "modType": "FLAG", "value": 1 }
+        {
+          "stat": "ALWAYS_HITS",
+          "modType": "FLAG",
+          "value": 1
+        },
+        {
+          "stat": "CANNOT_CRIT",
+          "modType": "FLAG",
+          "value": 1
+        }
       ],
-      "adjacentIds": ["node_notable_fang", "node_crit_01"]
+      "adjacentIds": [
+        "node_notable_fang",
+        "node_crit_01",
+        "node_acc_01",
+        "node_dex_02"
+      ]
+    },
+    {
+      "id": "node_proj_01",
+      "name": "바람 가르기",
+      "type": "MINOR",
+      "position": {
+        "x": 130,
+        "y": -155
+      },
+      "stats": [
+        {
+          "stat": "ATTACK_DAMAGE",
+          "modType": "INCREASED",
+          "value": 12
+        },
+        {
+          "stat": "DEX",
+          "modType": "FLAT",
+          "value": 6
+        }
+      ],
+      "adjacentIds": [
+        "node_atk_spd_01",
+        "node_notable_fang",
+        "node_proj_02"
+      ]
+    },
+    {
+      "id": "node_proj_02",
+      "name": "연속 도약",
+      "type": "MINOR",
+      "position": {
+        "x": 170,
+        "y": -230
+      },
+      "stats": [
+        {
+          "stat": "ATTACK_SPEED",
+          "modType": "INCREASED",
+          "value": 6
+        },
+        {
+          "stat": "ACCURACY",
+          "modType": "INCREASED",
+          "value": 15
+        }
+      ],
+      "adjacentIds": [
+        "node_proj_01",
+        "node_notable_wind_fang"
+      ]
+    },
+    {
+      "id": "node_notable_wind_fang",
+      "name": "질풍의 송곳니",
+      "type": "NOTABLE",
+      "position": {
+        "x": 260,
+        "y": -255
+      },
+      "stats": [
+        {
+          "stat": "ATTACK_DAMAGE",
+          "modType": "INCREASED",
+          "value": 25
+        },
+        {
+          "stat": "ATTACK_SPEED",
+          "modType": "INCREASED",
+          "value": 10
+        },
+        {
+          "stat": "CRIT_CHANCE",
+          "modType": "INCREASED",
+          "value": 20
+        }
+      ],
+      "adjacentIds": [
+        "node_proj_02",
+        "node_notable_fang",
+        "node_acc_01"
+      ]
+    },
+    {
+      "id": "node_acc_01",
+      "name": "매의 시선",
+      "type": "MINOR",
+      "position": {
+        "x": 340,
+        "y": -215
+      },
+      "stats": [
+        {
+          "stat": "ACCURACY",
+          "modType": "INCREASED",
+          "value": 20
+        },
+        {
+          "stat": "CRIT_MULTIPLIER",
+          "modType": "FLAT",
+          "value": 15
+        }
+      ],
+      "adjacentIds": [
+        "node_notable_wind_fang",
+        "node_apex_feral_precision"
+      ]
+    },
+    {
+      "id": "node_crit_02",
+      "name": "급소 노리기",
+      "type": "MINOR",
+      "position": {
+        "x": 340,
+        "y": -20
+      },
+      "stats": [
+        {
+          "stat": "CRIT_CHANCE",
+          "modType": "INCREASED",
+          "value": 20
+        }
+      ],
+      "adjacentIds": [
+        "node_crit_01",
+        "node_crit_03",
+        "node_eva_01",
+        "node_crit_04"
+      ]
+    },
+    {
+      "id": "node_crit_03",
+      "name": "치명적인 발톱",
+      "type": "MINOR",
+      "position": {
+        "x": 420,
+        "y": -65
+      },
+      "stats": [
+        {
+          "stat": "CRIT_MULTIPLIER",
+          "modType": "FLAT",
+          "value": 20
+        }
+      ],
+      "adjacentIds": [
+        "node_crit_02",
+        "node_notable_predator_eye"
+      ]
+    },
+    {
+      "id": "node_notable_predator_eye",
+      "name": "포식자의 눈",
+      "type": "NOTABLE",
+      "position": {
+        "x": 480,
+        "y": -135
+      },
+      "stats": [
+        {
+          "stat": "CRIT_CHANCE",
+          "modType": "INCREASED",
+          "value": 35
+        },
+        {
+          "stat": "CRIT_MULTIPLIER",
+          "modType": "FLAT",
+          "value": 25
+        },
+        {
+          "stat": "ACCURACY",
+          "modType": "INCREASED",
+          "value": 15
+        }
+      ],
+      "adjacentIds": [
+        "node_crit_03",
+        "node_dex_02"
+      ]
+    },
+    {
+      "id": "node_dex_02",
+      "name": "유연한 몸놀림",
+      "type": "MINOR",
+      "position": {
+        "x": 420,
+        "y": -175
+      },
+      "stats": [
+        {
+          "stat": "DEX",
+          "modType": "FLAT",
+          "value": 14
+        },
+        {
+          "stat": "EVASION",
+          "modType": "INCREASED",
+          "value": 15
+        }
+      ],
+      "adjacentIds": [
+        "node_notable_predator_eye",
+        "node_apex_feral_precision"
+      ]
+    },
+    {
+      "id": "node_str_dex_01",
+      "name": "야성의 균형",
+      "type": "MINOR",
+      "position": {
+        "x": 30,
+        "y": -125
+      },
+      "stats": [
+        {
+          "stat": "STR",
+          "modType": "FLAT",
+          "value": 8
+        },
+        {
+          "stat": "DEX",
+          "modType": "FLAT",
+          "value": 8
+        }
+      ],
+      "adjacentIds": [
+        "node_dex_01",
+        "node_str_dex_02",
+        "node_notable_pack_hunter"
+      ]
+    },
+    {
+      "id": "node_str_dex_02",
+      "name": "사냥 본능",
+      "type": "MINOR",
+      "position": {
+        "x": -45,
+        "y": -165
+      },
+      "stats": [
+        {
+          "stat": "PHYSICAL_DAMAGE",
+          "modType": "INCREASED",
+          "value": 12
+        },
+        {
+          "stat": "ATTACK_SPEED",
+          "modType": "INCREASED",
+          "value": 6
+        }
+      ],
+      "adjacentIds": [
+        "node_str_dex_01",
+        "node_str_01",
+        "node_phys_03"
+      ]
+    },
+    {
+      "id": "node_notable_pack_hunter",
+      "name": "무리 사냥꾼",
+      "type": "NOTABLE",
+      "position": {
+        "x": 30,
+        "y": -235
+      },
+      "stats": [
+        {
+          "stat": "PHYSICAL_DAMAGE",
+          "modType": "INCREASED",
+          "value": 22
+        },
+        {
+          "stat": "CRIT_CHANCE",
+          "modType": "INCREASED",
+          "value": 20
+        },
+        {
+          "stat": "MAX_LIFE",
+          "modType": "FLAT",
+          "value": 20
+        }
+      ],
+      "adjacentIds": [
+        "node_str_dex_01"
+      ]
     },
     {
       "id": "node_life_01",
       "name": "야수의 활력",
       "type": "MINOR",
-      "position": { "x": 50, "y": 75 },
+      "position": {
+        "x": 50,
+        "y": 75
+      },
       "stats": [
-        { "stat": "MAX_LIFE", "modType": "INCREASED", "value": 8 },
-        { "stat": "MAX_LIFE", "modType": "FLAT", "value": 15 }
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 8
+        },
+        {
+          "stat": "MAX_LIFE",
+          "modType": "FLAT",
+          "value": 15
+        }
       ],
-      "adjacentIds": ["node_wolf_start", "node_dex_01", "node_ms_01", "node_armour_01"]
+      "adjacentIds": [
+        "node_wolf_start",
+        "node_dex_01",
+        "node_ms_01",
+        "node_armour_01",
+        "node_life_03"
+      ]
     },
     {
       "id": "node_ms_01",
       "name": "질주 본능",
       "type": "MINOR",
-      "position": { "x": 140, "y": 100 },
+      "position": {
+        "x": 140,
+        "y": 100
+      },
       "stats": [
-        { "stat": "MOVEMENT_SPEED", "modType": "INCREASED", "value": 8 },
-        { "stat": "EVASION", "modType": "INCREASED", "value": 12 }
+        {
+          "stat": "MOVEMENT_SPEED",
+          "modType": "INCREASED",
+          "value": 8
+        },
+        {
+          "stat": "EVASION",
+          "modType": "INCREASED",
+          "value": 12
+        }
       ],
-      "adjacentIds": ["node_life_01", "node_apex_lone_wolf"]
+      "adjacentIds": [
+        "node_life_01",
+        "node_apex_lone_wolf",
+        "node_eva_01"
+      ]
     },
     {
       "id": "node_apex_lone_wolf",
       "name": "고독한 늑대",
       "type": "APEX",
-      "position": { "x": 230, "y": 140 },
+      "position": {
+        "x": 230,
+        "y": 140
+      },
       "stats": [
-        { "stat": "DISABLE_MINIONS", "modType": "FLAG", "value": 1 },
-        { "stat": "DAMAGE_TAKEN", "modType": "MORE", "value": -10 },
-        { "stat": "MOVEMENT_SPEED", "modType": "INCREASED", "value": 15 }
+        {
+          "stat": "DISABLE_MINIONS",
+          "modType": "FLAG",
+          "value": 1
+        },
+        {
+          "stat": "DAMAGE_TAKEN",
+          "modType": "MORE",
+          "value": -10
+        },
+        {
+          "stat": "MOVEMENT_SPEED",
+          "modType": "INCREASED",
+          "value": 15
+        }
       ],
-      "adjacentIds": ["node_ms_01"]
+      "adjacentIds": [
+        "node_ms_01",
+        "node_life_02"
+      ]
     },
     {
-      "id": "node_armour_01",
-      "name": "거친 모피",
+      "id": "node_eva_01",
+      "name": "날렵한 발걸음",
       "type": "MINOR",
-      "position": { "x": -40, "y": 135 },
+      "position": {
+        "x": 215,
+        "y": 45
+      },
       "stats": [
-        { "stat": "ARMOUR", "modType": "FLAT", "value": 40 },
-        { "stat": "MAX_LIFE", "modType": "INCREASED", "value": 6 }
+        {
+          "stat": "EVASION",
+          "modType": "INCREASED",
+          "value": 18
+        },
+        {
+          "stat": "DEX",
+          "modType": "FLAT",
+          "value": 8
+        }
       ],
-      "adjacentIds": ["node_life_01", "node_notable_blood_pelt"]
+      "adjacentIds": [
+        "node_ms_01",
+        "node_crit_02",
+        "node_eva_02"
+      ]
     },
     {
-      "id": "node_notable_blood_pelt",
-      "name": "피의 갑주",
+      "id": "node_eva_02",
+      "name": "그림자 회피",
+      "type": "MINOR",
+      "position": {
+        "x": 305,
+        "y": 65
+      },
+      "stats": [
+        {
+          "stat": "EVASION",
+          "modType": "INCREASED",
+          "value": 20
+        },
+        {
+          "stat": "MOVEMENT_SPEED",
+          "modType": "INCREASED",
+          "value": 6
+        }
+      ],
+      "adjacentIds": [
+        "node_eva_01",
+        "node_notable_shadow_pelt",
+        "node_crit_04"
+      ]
+    },
+    {
+      "id": "node_notable_shadow_pelt",
+      "name": "유령 가죽",
       "type": "NOTABLE",
-      "position": { "x": -125, "y": 170 },
+      "position": {
+        "x": 385,
+        "y": 115
+      },
       "stats": [
-        { "stat": "MAX_LIFE", "modType": "FLAT", "value": 35 },
-        { "stat": "MAX_LIFE", "modType": "INCREASED", "value": 14 }
+        {
+          "stat": "EVASION",
+          "modType": "INCREASED",
+          "value": 35
+        },
+        {
+          "stat": "MOVEMENT_SPEED",
+          "modType": "INCREASED",
+          "value": 10
+        },
+        {
+          "stat": "COLD_RES",
+          "modType": "FLAT",
+          "value": 15
+        }
       ],
-      "adjacentIds": ["node_armour_01", "node_apex_bloodthirst"]
+      "adjacentIds": [
+        "node_eva_02",
+        "node_res_01"
+      ]
     },
     {
-      "id": "node_apex_bloodthirst",
-      "name": "피의 갈증",
-      "type": "APEX",
-      "position": { "x": -220, "y": 135 },
+      "id": "node_res_01",
+      "name": "혹한의 적응",
+      "type": "MINOR",
+      "position": {
+        "x": 320,
+        "y": 185
+      },
       "stats": [
-        { "stat": "BLOODTHIRST", "modType": "FLAG", "value": 1 },
-        { "stat": "PHYSICAL_DAMAGE", "modType": "MORE", "value": 25 }
+        {
+          "stat": "FIRE_RES",
+          "modType": "FLAT",
+          "value": 12
+        },
+        {
+          "stat": "COLD_RES",
+          "modType": "FLAT",
+          "value": 12
+        }
       ],
-      "adjacentIds": ["node_notable_blood_pelt", "node_bleed_01"]
+      "adjacentIds": [
+        "node_notable_shadow_pelt",
+        "node_life_02"
+      ]
+    },
+    {
+      "id": "node_life_02",
+      "name": "끈질긴 생명",
+      "type": "MINOR",
+      "position": {
+        "x": 245,
+        "y": 225
+      },
+      "stats": [
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 8
+        },
+        {
+          "stat": "EVASION",
+          "modType": "INCREASED",
+          "value": 14
+        }
+      ],
+      "adjacentIds": [
+        "node_res_01",
+        "node_apex_lone_wolf",
+        "node_life_04"
+      ]
+    },
+    {
+      "id": "node_life_03",
+      "name": "야수의 숨결",
+      "type": "MINOR",
+      "position": {
+        "x": 40,
+        "y": 175
+      },
+      "stats": [
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 8
+        },
+        {
+          "stat": "MAX_MANA",
+          "modType": "FLAT",
+          "value": 15
+        }
+      ],
+      "adjacentIds": [
+        "node_life_01",
+        "node_life_04",
+        "node_armour_02"
+      ]
+    },
+    {
+      "id": "node_life_04",
+      "name": "강인한 체력",
+      "type": "MINOR",
+      "position": {
+        "x": 125,
+        "y": 235
+      },
+      "stats": [
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 10
+        },
+        {
+          "stat": "FIRE_RES",
+          "modType": "FLAT",
+          "value": 10
+        }
+      ],
+      "adjacentIds": [
+        "node_life_03",
+        "node_life_02",
+        "node_notable_wild_heart"
+      ]
+    },
+    {
+      "id": "node_notable_wild_heart",
+      "name": "야생의 심장",
+      "type": "NOTABLE",
+      "position": {
+        "x": 135,
+        "y": 315
+      },
+      "stats": [
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 16
+        },
+        {
+          "stat": "MAX_LIFE",
+          "modType": "FLAT",
+          "value": 45
+        },
+        {
+          "stat": "MOVEMENT_SPEED",
+          "modType": "INCREASED",
+          "value": 6
+        }
+      ],
+      "adjacentIds": [
+        "node_life_04",
+        "node_res_02"
+      ]
+    },
+    {
+      "id": "node_res_02",
+      "name": "원소 저항력",
+      "type": "MINOR",
+      "position": {
+        "x": 45,
+        "y": 310
+      },
+      "stats": [
+        {
+          "stat": "FIRE_RES",
+          "modType": "FLAT",
+          "value": 15
+        },
+        {
+          "stat": "COLD_RES",
+          "modType": "FLAT",
+          "value": 15
+        }
+      ],
+      "adjacentIds": [
+        "node_notable_wild_heart",
+        "node_armour_02",
+        "node_life_05"
+      ]
+    },
+    {
+      "id": "node_armour_02",
+      "name": "두꺼운 뼈대",
+      "type": "MINOR",
+      "position": {
+        "x": -15,
+        "y": 235
+      },
+      "stats": [
+        {
+          "stat": "ARMOUR",
+          "modType": "FLAT",
+          "value": 50
+        },
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 6
+        }
+      ],
+      "adjacentIds": [
+        "node_armour_01",
+        "node_life_03",
+        "node_res_02",
+        "node_blood_life_01"
+      ]
     },
     {
       "id": "node_phys_01",
       "name": "단련된 이빨",
       "type": "MINOR",
-      "position": { "x": -90, "y": -30 },
+      "position": {
+        "x": -90,
+        "y": -30
+      },
       "stats": [
-        { "stat": "PHYSICAL_DAMAGE", "modType": "INCREASED", "value": 14 },
-        { "stat": "STR", "modType": "FLAT", "value": 8 }
+        {
+          "stat": "PHYSICAL_DAMAGE",
+          "modType": "INCREASED",
+          "value": 14
+        },
+        {
+          "stat": "STR",
+          "modType": "FLAT",
+          "value": 8
+        }
       ],
-      "adjacentIds": ["node_wolf_start", "node_bleed_01"]
+      "adjacentIds": [
+        "node_wolf_start",
+        "node_bleed_01",
+        "node_str_01"
+      ]
     },
     {
       "id": "node_bleed_01",
       "name": "찢어발기기",
       "type": "NOTABLE",
-      "position": { "x": -175, "y": 35 },
+      "position": {
+        "x": -175,
+        "y": 35
+      },
       "stats": [
-        { "stat": "AILMENT_DAMAGE", "modType": "INCREASED", "value": 30 },
-        { "stat": "BLEED_CHANCE", "modType": "FLAT", "value": 25 }
+        {
+          "stat": "AILMENT_DAMAGE",
+          "modType": "INCREASED",
+          "value": 30
+        },
+        {
+          "stat": "BLEED_CHANCE",
+          "modType": "FLAT",
+          "value": 25
+        }
       ],
-      "adjacentIds": ["node_phys_01", "node_apex_bloodthirst"]
+      "adjacentIds": [
+        "node_phys_01",
+        "node_apex_bloodthirst",
+        "node_atk_spd_02",
+        "node_bleed_02"
+      ]
+    },
+    {
+      "id": "node_armour_01",
+      "name": "거친 모피",
+      "type": "MINOR",
+      "position": {
+        "x": -40,
+        "y": 135
+      },
+      "stats": [
+        {
+          "stat": "ARMOUR",
+          "modType": "FLAT",
+          "value": 40
+        },
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 6
+        }
+      ],
+      "adjacentIds": [
+        "node_life_01",
+        "node_notable_blood_pelt",
+        "node_armour_02"
+      ]
+    },
+    {
+      "id": "node_notable_blood_pelt",
+      "name": "피의 갑주",
+      "type": "NOTABLE",
+      "position": {
+        "x": -125,
+        "y": 170
+      },
+      "stats": [
+        {
+          "stat": "MAX_LIFE",
+          "modType": "FLAT",
+          "value": 35
+        },
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 14
+        }
+      ],
+      "adjacentIds": [
+        "node_armour_01",
+        "node_apex_bloodthirst",
+        "node_blood_life_01"
+      ]
+    },
+    {
+      "id": "node_apex_bloodthirst",
+      "name": "피의 갈증",
+      "type": "APEX",
+      "position": {
+        "x": -220,
+        "y": 135
+      },
+      "stats": [
+        {
+          "stat": "BLOODTHIRST",
+          "modType": "FLAG",
+          "value": 1
+        },
+        {
+          "stat": "PHYSICAL_DAMAGE",
+          "modType": "MORE",
+          "value": 25
+        }
+      ],
+      "adjacentIds": [
+        "node_notable_blood_pelt",
+        "node_bleed_01",
+        "node_bleed_04",
+        "node_blood_phys_01"
+      ]
+    },
+    {
+      "id": "node_str_01",
+      "name": "야수의 근력",
+      "type": "MINOR",
+      "position": {
+        "x": -155,
+        "y": -100
+      },
+      "stats": [
+        {
+          "stat": "STR",
+          "modType": "FLAT",
+          "value": 12
+        },
+        {
+          "stat": "PHYSICAL_DAMAGE",
+          "modType": "INCREASED",
+          "value": 10
+        }
+      ],
+      "adjacentIds": [
+        "node_phys_01",
+        "node_str_dex_02",
+        "node_phys_02"
+      ]
+    },
+    {
+      "id": "node_phys_02",
+      "name": "묵직한 타격",
+      "type": "MINOR",
+      "position": {
+        "x": -235,
+        "y": -145
+      },
+      "stats": [
+        {
+          "stat": "PHYSICAL_DAMAGE",
+          "modType": "INCREASED",
+          "value": 14
+        },
+        {
+          "stat": "ADDED_PHYSICAL_DAMAGE",
+          "modType": "FLAT",
+          "value": 4
+        }
+      ],
+      "adjacentIds": [
+        "node_str_01",
+        "node_notable_iron_claw",
+        "node_phys_03"
+      ]
+    },
+    {
+      "id": "node_notable_iron_claw",
+      "name": "강철 발톱",
+      "type": "NOTABLE",
+      "position": {
+        "x": -320,
+        "y": -105
+      },
+      "stats": [
+        {
+          "stat": "PHYSICAL_DAMAGE",
+          "modType": "INCREASED",
+          "value": 28
+        },
+        {
+          "stat": "ADDED_PHYSICAL_DAMAGE",
+          "modType": "FLAT",
+          "value": 8
+        },
+        {
+          "stat": "ARMOUR",
+          "modType": "FLAT",
+          "value": 60
+        }
+      ],
+      "adjacentIds": [
+        "node_phys_02",
+        "node_atk_spd_02",
+        "node_bleed_03"
+      ]
+    },
+    {
+      "id": "node_atk_spd_02",
+      "name": "광란의 연타",
+      "type": "MINOR",
+      "position": {
+        "x": -240,
+        "y": -55
+      },
+      "stats": [
+        {
+          "stat": "ATTACK_SPEED",
+          "modType": "INCREASED",
+          "value": 8
+        },
+        {
+          "stat": "STR",
+          "modType": "FLAT",
+          "value": 8
+        }
+      ],
+      "adjacentIds": [
+        "node_notable_iron_claw",
+        "node_bleed_01"
+      ]
+    },
+    {
+      "id": "node_bleed_02",
+      "name": "깊은 상처",
+      "type": "MINOR",
+      "position": {
+        "x": -265,
+        "y": 25
+      },
+      "stats": [
+        {
+          "stat": "BLEED_CHANCE",
+          "modType": "FLAT",
+          "value": 15
+        },
+        {
+          "stat": "AILMENT_DAMAGE",
+          "modType": "INCREASED",
+          "value": 16
+        }
+      ],
+      "adjacentIds": [
+        "node_bleed_01",
+        "node_bleed_03"
+      ]
+    },
+    {
+      "id": "node_bleed_03",
+      "name": "과다 출혈",
+      "type": "MINOR",
+      "position": {
+        "x": -355,
+        "y": 5
+      },
+      "stats": [
+        {
+          "stat": "AILMENT_DAMAGE",
+          "modType": "INCREASED",
+          "value": 20
+        },
+        {
+          "stat": "PHYSICAL_DAMAGE",
+          "modType": "INCREASED",
+          "value": 10
+        }
+      ],
+      "adjacentIds": [
+        "node_bleed_02",
+        "node_notable_iron_claw",
+        "node_notable_crimson_artery"
+      ]
+    },
+    {
+      "id": "node_notable_crimson_artery",
+      "name": "진홍빛 동맥",
+      "type": "NOTABLE",
+      "position": {
+        "x": -415,
+        "y": 85
+      },
+      "stats": [
+        {
+          "stat": "BLEED_CHANCE",
+          "modType": "FLAT",
+          "value": 30
+        },
+        {
+          "stat": "AILMENT_DAMAGE",
+          "modType": "INCREASED",
+          "value": 35
+        },
+        {
+          "stat": "ATTACK_SPEED",
+          "modType": "INCREASED",
+          "value": 8
+        }
+      ],
+      "adjacentIds": [
+        "node_bleed_03",
+        "node_bleed_04",
+        "node_bleed_05"
+      ]
+    },
+    {
+      "id": "node_bleed_04",
+      "name": "피의 잔향",
+      "type": "MINOR",
+      "position": {
+        "x": -335,
+        "y": 135
+      },
+      "stats": [
+        {
+          "stat": "AILMENT_DAMAGE",
+          "modType": "INCREASED",
+          "value": 18
+        },
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 6
+        }
+      ],
+      "adjacentIds": [
+        "node_notable_crimson_artery",
+        "node_apex_bloodthirst"
+      ]
+    },
+    {
+      "id": "node_blood_life_01",
+      "name": "응고된 피",
+      "type": "MINOR",
+      "position": {
+        "x": -130,
+        "y": 260
+      },
+      "stats": [
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 10
+        },
+        {
+          "stat": "ARMOUR",
+          "modType": "FLAT",
+          "value": 40
+        }
+      ],
+      "adjacentIds": [
+        "node_armour_02",
+        "node_notable_blood_pelt",
+        "node_blood_life_02",
+        "node_life_05"
+      ]
+    },
+    {
+      "id": "node_blood_life_02",
+      "name": "불굴의 혈통",
+      "type": "MINOR",
+      "position": {
+        "x": -220,
+        "y": 290
+      },
+      "stats": [
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 12
+        },
+        {
+          "stat": "STR",
+          "modType": "FLAT",
+          "value": 10
+        }
+      ],
+      "adjacentIds": [
+        "node_blood_life_01",
+        "node_notable_juggernaut_pelt"
+      ]
+    },
+    {
+      "id": "node_notable_juggernaut_pelt",
+      "name": "거수의 모피",
+      "type": "NOTABLE",
+      "position": {
+        "x": -305,
+        "y": 245
+      },
+      "stats": [
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 18
+        },
+        {
+          "stat": "ARMOUR",
+          "modType": "FLAT",
+          "value": 100
+        },
+        {
+          "stat": "FIRE_RES",
+          "modType": "FLAT",
+          "value": 15
+        }
+      ],
+      "adjacentIds": [
+        "node_blood_life_02",
+        "node_blood_phys_01",
+        "node_bleed_05"
+      ]
+    },
+    {
+      "id": "node_blood_phys_01",
+      "name": "피의 격노",
+      "type": "MINOR",
+      "position": {
+        "x": -315,
+        "y": 190
+      },
+      "stats": [
+        {
+          "stat": "PHYSICAL_DAMAGE",
+          "modType": "INCREASED",
+          "value": 16
+        },
+        {
+          "stat": "MAX_LIFE",
+          "modType": "INCREASED",
+          "value": 6
+        }
+      ],
+      "adjacentIds": [
+        "node_notable_juggernaut_pelt",
+        "node_apex_bloodthirst"
+      ]
+    },
+    {
+      "id": "node_crit_04",
+      "name": "매서운 일격",
+      "type": "MINOR",
+      "position": {
+        "x": 415,
+        "y": 30
+      },
+      "stats": [
+        {
+          "stat": "CRIT_MULTIPLIER",
+          "modType": "FLAT",
+          "value": 18
+        },
+        {
+          "stat": "ATTACK_SPEED",
+          "modType": "INCREASED",
+          "value": 6
+        }
+      ],
+      "adjacentIds": [
+        "node_crit_02",
+        "node_eva_02"
+      ]
+    },
+    {
+      "id": "node_life_05",
+      "name": "대지의 축복",
+      "type": "MINOR",
+      "position": {
+        "x": -60,
+        "y": 325
+      },
+      "stats": [
+        {
+          "stat": "MAX_LIFE",
+          "modType": "FLAT",
+          "value": 30
+        },
+        {
+          "stat": "ARMOUR",
+          "modType": "FLAT",
+          "value": 35
+        }
+      ],
+      "adjacentIds": [
+        "node_res_02",
+        "node_blood_life_01"
+      ]
+    },
+    {
+      "id": "node_phys_03",
+      "name": "파괴 본능",
+      "type": "MINOR",
+      "position": {
+        "x": -135,
+        "y": -185
+      },
+      "stats": [
+        {
+          "stat": "PHYSICAL_DAMAGE",
+          "modType": "INCREASED",
+          "value": 14
+        },
+        {
+          "stat": "ATTACK_DAMAGE",
+          "modType": "INCREASED",
+          "value": 10
+        }
+      ],
+      "adjacentIds": [
+        "node_str_dex_02",
+        "node_phys_02"
+      ]
+    },
+    {
+      "id": "node_bleed_05",
+      "name": "선혈의 사냥",
+      "type": "MINOR",
+      "position": {
+        "x": -395,
+        "y": 185
+      },
+      "stats": [
+        {
+          "stat": "BLEED_CHANCE",
+          "modType": "FLAT",
+          "value": 15
+        },
+        {
+          "stat": "MAX_LIFE",
+          "modType": "FLAT",
+          "value": 20
+        }
+      ],
+      "adjacentIds": [
+        "node_notable_crimson_artery",
+        "node_notable_juggernaut_pelt"
+      ]
     }
   ]
 }
