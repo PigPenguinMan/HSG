@@ -1,0 +1,79 @@
+{
+  "version": "0.1.0",
+  "nodes": [
+    {
+      "id": "node_wolf_start",
+      "name": "늑대 부족의 기원",
+      "type": "START",
+      "race": "WOLF",
+      "position": { "x": 0, "y": 0 },
+      "stats": [],
+      "adjacentIds": ["node_dex_01", "node_life_01"]
+    },
+    {
+      "id": "node_dex_01",
+      "name": "날카로운 감각",
+      "type": "MINOR",
+      "position": { "x": 80, "y": -40 },
+      "stats": [
+        { "stat": "DEX", "modType": "FLAT", "value": 10 },
+        { "stat": "ACCURACY", "modType": "INCREASED", "value": 12 }
+      ],
+      "adjacentIds": ["node_wolf_start", "node_notable_fang", "node_life_01"]
+    },
+    {
+      "id": "node_life_01",
+      "name": "야수의 활력",
+      "type": "MINOR",
+      "position": { "x": 40, "y": 60 },
+      "stats": [
+        { "stat": "MAX_LIFE", "modType": "INCREASED", "value": 8 }
+      ],
+      "adjacentIds": ["node_wolf_start", "node_dex_01", "node_apex_lone_wolf"]
+    },
+    {
+      "id": "node_notable_fang",
+      "name": "굶주린 송곳니",
+      "type": "NOTABLE",
+      "position": { "x": 160, "y": -80 },
+      "stats": [
+        { "stat": "PHYSICAL_DAMAGE", "modType": "INCREASED", "value": 24 },
+        { "stat": "BLEED_CHANCE", "modType": "FLAT", "value": 20 }
+      ],
+      "adjacentIds": ["node_dex_01", "node_apex_feral_precision"]
+    },
+    {
+      "id": "node_apex_lone_wolf",
+      "name": "고독한 늑대",
+      "type": "APEX",
+      "position": { "x": 140, "y": 130 },
+      "stats": [
+        { "stat": "DISABLE_MINIONS", "modType": "FLAG", "value": 1 },
+        { "stat": "DAMAGE_TAKEN", "modType": "MORE", "value": -10 },
+        { "stat": "MOVEMENT_SPEED", "modType": "INCREASED", "value": 15 }
+      ],
+      "adjacentIds": ["node_life_01"]
+    },
+    {
+      "id": "node_apex_feral_precision",
+      "name": "야수의 직감",
+      "type": "APEX",
+      "position": { "x": 240, "y": -110 },
+      "stats": [
+        { "stat": "ALWAYS_HITS", "modType": "FLAG", "value": 1 },
+        { "stat": "CANNOT_CRIT", "modType": "FLAG", "value": 1 }
+      ],
+      "adjacentIds": ["node_notable_fang"]
+    },
+    {
+      "id": "node_apex_bloodthirst",
+      "name": "피의 갈증",
+      "type": "APEX",
+      "position": { "x": -140, "y": 100 },
+      "stats": [
+        { "stat": "BLOODTHIRST", "modType": "FLAG", "value": 1 }
+      ],
+      "adjacentIds": ["node_life_01"]
+    }
+  ]
+}
