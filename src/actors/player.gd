@@ -243,10 +243,13 @@ func _physics_process(delta: float) -> void:
 			_shadow_dash_tick()
 		return
 
-	var input_dir := Vector2(
-		Input.get_action_strength("move_right") - Input.get_action_strength("move_left"),
-		Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
-	).normalized()
+	var move_x := Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
+	var move_y := Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
+	if move_x == 0.0:
+		move_x = float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT)) - float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT))
+	if move_y == 0.0:
+		move_y = float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN)) - float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP))
+	var input_dir := Vector2(move_x, move_y).normalized()
 
 	velocity = input_dir * move_speed
 	move_and_slide()
