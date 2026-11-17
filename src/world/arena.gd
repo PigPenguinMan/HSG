@@ -235,7 +235,7 @@ func _enter_zone(zone_id: String, spawn_pos: Vector2) -> void:
 	_player.global_position = spawn_pos
 
 	var sz := Vector2(float(z["size"][0]), float(z["size"][1]))
-	var g := z["ground"]
+	var g: Array = z["ground"]
 	_build_ground(sz, Color(float(g[0]), float(g[1]), float(g[2])))
 	_build_walls(sz)
 
@@ -420,7 +420,7 @@ func _build_waypoint(pos: Vector2) -> void:
 
 func _build_npc(npc: Dictionary) -> void:
 	var pos := Vector2(float(npc["pos"][0]), float(npc["pos"][1]))
-	var c := npc["color"]
+	var c: Array = npc["color"]
 	var area := Area2D.new()
 	area.position = pos
 	area.collision_layer = 0
