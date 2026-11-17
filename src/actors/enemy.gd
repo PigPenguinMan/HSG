@@ -20,6 +20,8 @@ var knockback_resist: float = 0.0
 
 var bleed_dps: float = 0.0
 var bleed_timer: float = 0.0
+var ignite_dps: float = 0.0
+var ignite_timer: float = 0.0
 var attack_cooldown: float = 0.0
 var aggro: bool = false
 var _seen_shot_groups: Dictionary = {}
@@ -91,6 +93,14 @@ func _physics_process(delta: float) -> void:
 			_die()
 			return
 
+	if ignite_timer > 0.0:
+		ignite_timer -= delta
+		hp -= ignite_dps * delta
+		_update_hp_bar()
+		if hp <= 0.0:
+			_die()
+			return
+
 	attack_cooldown = maxf(0.0, attack_cooldown - delta)
 	var player := get_tree().get_first_node_in_group("player") as Node2D
 	if player == null:
@@ -152,6 +162,11 @@ func take_hit(hit_result: Dictionary, shot_group_id: int = 0) -> bool:
 	if incoming_bleed > bleed_dps:
 		bleed_dps = incoming_bleed
 		bleed_timer = 4.0
+
+	var incoming_ignite: float = float(hit_result.get("ignite_dps", 0.0))
+	if incoming_ignite > ignite_dps:
+		ignite_dps = incoming_ignite
+		ignite_timer = 4.0
 
 	_update_hp_bar()
 	if hp <= 0.0:

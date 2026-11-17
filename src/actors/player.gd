@@ -58,6 +58,16 @@ var _shake_intensity: float = 0.0
 var _shake_timer: float = 0.0
 var _hitstop_active: bool = false
 var _hurt_flash_timer: float = 0.0
+var _dash_hit_ids: Dictionary = {}
+
+var skills_db: Dictionary = {}
+var runes_db: Dictionary = {}
+var skill_slots: Dictionary = {
+	"LMB": {"skill_id": "crimson_flurry", "runes": []},
+	"RMB": {"skill_id": "piercing_fang", "runes": []},
+	"Q": {"skill_id": "bloodmoon_orb", "runes": []},
+	"SPACE": {"skill_id": "shadow_dash", "runes": []},
+}
 
 
 func _ready() -> void:
@@ -67,6 +77,7 @@ func _ready() -> void:
 
 	passive_tree.load_from_json_file("res://data/passive_tree.json")
 	item_gen.load_affixes_from_json_file("res://data/affixes.json")
+	_load_skills_db()
 
 	var col := CollisionShape2D.new()
 	var circle := CircleShape2D.new()
@@ -228,6 +239,8 @@ func _physics_process(delta: float) -> void:
 		_dash_timer -= delta
 		velocity = _dash_dir * 620.0
 		move_and_slide()
+		if not in_town:
+			_shadow_dash_tick()
 		return
 
 	var input_dir := Vector2(
@@ -246,22 +259,81 @@ func _physics_process(delta: float) -> void:
 		_dash_dir = mouse_dir if input_dir == Vector2.ZERO else input_dir
 		_dash_timer = 0.16
 		_dash_cd = 1.2
+		_dash_hit_ids.clear()
 
 	var atk_speed_mult: float = stats.get_stat("ATTACK_SPEED", 1.0)
 	var cd_scale: float = 1.0 / maxf(0.5, atk_speed_mult)
 
-	if not in_town:
-		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT) and _attack_cd <= 0.0:
-			if _try_spend_resource(4.0):
-				_use_crimson_flurry(mouse_dir, cd_scale)
-		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT) and _attack_cd <= 0.0:
-			if _try_spend_resource(8.0):
-				_use_piercing_fang(mouse_dir, cd_scale)
+	if not in_town and _attack_cd <= 0.0:
+		if Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			_trigger_slot("LMB", mouse_dir, cd_scale)
+		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
+			_trigger_slot("RMB", mouse_dir, cd_scale)
+		elif Input.is_key_pressed(KEY_Q):
+			_trigger_slot("Q", mouse_dir, cd_scale)
 
 	if Input.is_key_pressed(KEY_1) and flask_charges > 0 and hp < max_hp:
 		flask_charges -= 1
 		hp = minf(max_hp, hp + 45.0)
 
+	_emit_stats()
+
+
+func _load_skills_db() -> void:
+	if not FileAccess.file_exists("res://data/skills.json"):
+		return
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://data/skills.json"))
+	if not parsed is Dictionary:
+		return
+	for s in parsed.get("active_skills", []):
+		skills_db[str(s["id"])] = s
+	for r in parsed.get("support_runes", []):
+		runes_db[str(r["id"])] = r
+
+
+func can_link_rune(skill_id: String, rune_id: String) -> bool:
+	if not skills_db.has(skill_id) or not runes_db.has(rune_id):
+		return false
+	var stags: Array = skills_db[skill_id].get("tags", [])
+	var reqs: Array = runes_db[rune_id].get("required_tags", [])
+	for t in reqs:
+		if stags.has(t):
+			return true
+	return false
+
+
+func set_slot_skill(slot_key: String, skill_id: String) -> bool:
+	if not skill_slots.has(slot_key) or not skills_db.has(skill_id):
+		return false
+	var slot: Dictionary = skill_slots[slot_key]
+	slot["skill_id"] = skill_id
+	var valid_runes: Array = []
+	for rid in slot["runes"]:
+		if can_link_rune(skill_id, str(rid)):
+			valid_runes.append(rid)
+	slot["runes"] = valid_runes
+	rpg_state_changed.emit()
+	return true
+
+
+func toggle_rune(slot_key: String, rune_id: String) -> bool:
+	if not skill_slots.has(slot_key):
+		return false
+	var slot: Dictionary = skill_slots[slot_key]
+	var runes: Array = slot["runes"]
+	if runes.has(rune_id):
+		runes.erase(rune_id)
+		rpg_state_changed.emit()
+		return true
+	if runes.size() >= 3 or not can_link_rune(str(slot["skill_id"]), rune_id):
+		return false
+	runes.append(rune_id)
+	rpg_state_changed.emit()
+	return true
+
+
+func heal(amount: float) -> void:
+	hp = minf(max_hp, hp + amount)
 	_emit_stats()
 
 
@@ -278,60 +350,151 @@ func _try_spend_resource(cost: float) -> bool:
 	return true
 
 
-func _use_crimson_flurry(aim_dir: Vector2, cd_scale: float) -> void:
-	_attack_cd = 0.34 * cd_scale
+func _build_skill_context(skill_def: Dictionary, rune_ids: Array) -> Dictionary:
+	var skill_stats := stats.clone()
+	var extra_proj: int = 0
+	var aoe_mult: float = 1.0
+	var leech_pct: float = 0.0
+	var sid := str(skill_def.get("id", ""))
+
+	for rid in rune_ids:
+		if not can_link_rune(sid, str(rid)):
+			continue
+		var r: Dictionary = runes_db[str(rid)]
+		if r.has("extra_projectiles"):
+			extra_proj += int(r["extra_projectiles"])
+		if r.has("damage_more"):
+			skill_stats.add_modifier(StatTypes.make_mod("GLOBAL_DAMAGE", StatTypes.ModType.MORE, float(r["damage_more"]), str(rid)))
+		if r.has("phys_more"):
+			skill_stats.add_modifier(StatTypes.make_mod("PHYSICAL_DAMAGE", StatTypes.ModType.MORE, float(r["phys_more"]), str(rid)))
+		if bool(r.get("cannot_non_phys", false)):
+			skill_stats.add_modifier(StatTypes.make_mod("CANNOT_DEAL_NON_PHYSICAL", StatTypes.ModType.FLAG, 1.0, str(rid)))
+		if r.has("aoe_mult"):
+			aoe_mult *= float(r["aoe_mult"])
+		if r.has("leech_pct"):
+			leech_pct += float(r["leech_pct"])
+
+	return {
+		"stats": skill_stats,
+		"extra_proj": extra_proj,
+		"aoe_mult": aoe_mult,
+		"leech_pct": leech_pct,
+	}
+
+
+func _to_pipeline_skill(skill_def: Dictionary) -> Dictionary:
+	var src := StatTypes.DamageSource.ATTACK_HIT
+	if str(skill_def.get("damage_source", "ATTACK_HIT")) == "SPELL_HIT":
+		src = StatTypes.DamageSource.SPELL_HIT
+	return {
+		"damage_source": src,
+		"tags": skill_def.get("tags", []),
+		"base_physical": float(skill_def.get("base_physical", 0.0)),
+		"base_fire": float(skill_def.get("base_fire", 0.0)),
+		"damage_effectiveness": float(skill_def.get("damage_effectiveness", 1.0)),
+	}
+
+
+func _trigger_slot(slot_key: String, aim_dir: Vector2, cd_scale: float) -> void:
+	var slot: Dictionary = skill_slots.get(slot_key, {})
+	var sid := str(slot.get("skill_id", ""))
+	if not skills_db.has(sid):
+		return
+	var sdef: Dictionary = skills_db[sid]
+	var cost := float(sdef.get("mana_cost", 4.0))
+	if not _try_spend_resource(cost):
+		return
+	_attack_cd = float(sdef.get("cooldown", 0.34)) * cd_scale
+	var ctx := _build_skill_context(sdef, slot.get("runes", []))
+	match sid:
+		"crimson_flurry":
+			_exec_melee_cone(sdef, ctx, aim_dir, Color(0.85, 0.12, 0.18, 0.55), 0.35)
+		"crushing_slam":
+			_exec_melee_cone(sdef, ctx, aim_dir, Color(0.9, 0.55, 0.2, 0.55), 0.0)
+		"piercing_fang":
+			_exec_projectiles(sdef, ctx, aim_dir, Color(0.85, 0.92, 1.0), 520.0, 0.0)
+		"bloodmoon_orb":
+			var aoe := float(sdef.get("aoe_radius", 68.0)) * float(ctx["aoe_mult"])
+			_exec_projectiles(sdef, ctx, aim_dir, Color(1.0, 0.35, 0.15), 400.0, aoe)
+
+
+func _exec_melee_cone(sdef: Dictionary, ctx: Dictionary, aim_dir: Vector2, col: Color, dot_min: float) -> void:
+	var radius: float = float(sdef.get("aoe_radius", 64.0)) * float(ctx["aoe_mult"])
 	var slash := Polygon2D.new()
 	var base_angle := aim_dir.angle()
 	var pts := PackedVector2Array([Vector2.ZERO])
-	for i in range(-4, 5):
-		var a := base_angle + float(i) * 0.14
-		pts.append(Vector2.from_angle(a) * 56.0)
+	var half_steps := 5 if dot_min <= 0.1 else 4
+	for i in range(-half_steps, half_steps + 1):
+		var a := base_angle + float(i) * (0.22 if dot_min <= 0.1 else 0.14)
+		pts.append(Vector2.from_angle(a) * radius * 0.9)
 	slash.polygon = pts
-	slash.color = Color(0.85, 0.12, 0.18, 0.55)
+	slash.color = col
 	get_parent().add_child(slash)
 	slash.global_position = global_position
-	get_tree().create_timer(0.11).timeout.connect(slash.queue_free)
+	get_tree().create_timer(0.12).timeout.connect(slash.queue_free)
 
-	var skill := {
-		"damage_source": StatTypes.DamageSource.ATTACK_HIT,
-		"tags": ["ATTACK", "MELEE", "AOE", "PHYSICAL", "BLEED"],
-		"base_physical": 26.0,
-		"damage_effectiveness": 1.1,
-	}
+	var p_stats: StatAggregator = ctx["stats"]
+	var leech := float(ctx["leech_pct"])
+	var pskill := _to_pipeline_skill(sdef)
+	var crit_chance: float = clampf(0.15 * p_stats.get_stat("CRIT_CHANCE", 1.0), 0.0, 1.0)
 
-	var crit_chance: float = clampf(0.15 * stats.get_stat("CRIT_CHANCE", 1.0), 0.0, 1.0)
 	for node in get_tree().get_nodes_in_group("enemies"):
 		var enemy := node as Enemy
 		if enemy == null:
 			continue
 		var to_e := enemy.global_position - global_position
-		if to_e.length() <= 64.0 and to_e.normalized().dot(aim_dir) >= 0.35:
+		if to_e.length() <= radius and to_e.normalized().dot(aim_dir) >= dot_min:
 			var is_crit := randf() < crit_chance
-			var res := DamagePipeline.calculate_hit(stats, {"armour": enemy.armour, "evasion": enemy.evasion}, skill, is_crit)
-			enemy.take_hit(res, 0)
+			var res := DamagePipeline.calculate_hit(p_stats, {"armour": enemy.armour, "evasion": enemy.evasion}, pskill, is_crit)
+			if enemy.take_hit(res, 0) and leech > 0.0:
+				heal(float(res.get("total_hit_damage", 0.0)) * leech)
 
 
-func _use_piercing_fang(aim_dir: Vector2, cd_scale: float) -> void:
-	_attack_cd = 0.30 * cd_scale
+func _exec_projectiles(sdef: Dictionary, ctx: Dictionary, aim_dir: Vector2, col: Color, spd: float, aoe: float) -> void:
 	_shot_group_counter += 1
 	var group_id := _shot_group_counter
+	var p_stats: StatAggregator = ctx["stats"]
+	var pskill := _to_pipeline_skill(sdef)
+	var crit_chance: float = clampf(0.15 * p_stats.get_stat("CRIT_CHANCE", 1.0), 0.0, 1.0)
+	var res := DamagePipeline.calculate_hit(p_stats, {"armour": 15.0, "evasion": 0.0}, pskill, randf() < crit_chance)
 
-	var skill := {
-		"damage_source": StatTypes.DamageSource.ATTACK_HIT,
-		"tags": ["ATTACK", "PROJECTILE", "PHYSICAL"],
-		"base_physical": 22.0,
-		"damage_effectiveness": 0.9,
-	}
-	var crit_chance: float = clampf(0.15 * stats.get_stat("CRIT_CHANCE", 1.0), 0.0, 1.0)
-	var res := DamagePipeline.calculate_hit(stats, {"armour": 15.0, "evasion": 0.0}, skill, randf() < crit_chance)
-
-	for offset in [-0.18, 0.0, 0.18]:
+	var count: int = int(sdef.get("projectiles", 1)) + int(ctx["extra_proj"])
+	var spread := 0.16
+	for i in range(count):
+		var offset := (float(i) - float(count - 1) * 0.5) * spread
 		var proj := Projectile.new()
 		proj.direction = aim_dir.rotated(offset)
+		proj.speed = spd
+		proj.color = col
+		proj.aoe_radius = aoe
+		proj.leech_pct = float(ctx["leech_pct"])
+		proj.owner_player = self
 		proj.shot_group_id = group_id
 		proj.hit_result = res
 		get_parent().add_child(proj)
 		proj.global_position = global_position + proj.direction * 14.0
+
+
+func _shadow_dash_tick() -> void:
+	if not skills_db.has("shadow_dash"):
+		return
+	var sdef: Dictionary = skills_db["shadow_dash"]
+	var slot: Dictionary = skill_slots.get("SPACE", {})
+	var ctx := _build_skill_context(sdef, slot.get("runes", []))
+	var p_stats: StatAggregator = ctx["stats"]
+	var leech := float(ctx["leech_pct"])
+	var pskill := _to_pipeline_skill(sdef)
+	var crit_chance: float = clampf(0.15 * p_stats.get_stat("CRIT_CHANCE", 1.0), 0.0, 1.0)
+
+	for node in get_tree().get_nodes_in_group("enemies"):
+		var enemy := node as Enemy
+		if enemy == null or _dash_hit_ids.has(enemy.get_instance_id()):
+			continue
+		if enemy.global_position.distance_to(global_position) <= 28.0:
+			_dash_hit_ids[enemy.get_instance_id()] = true
+			var res := DamagePipeline.calculate_hit(p_stats, {"armour": enemy.armour, "evasion": enemy.evasion}, pskill, randf() < crit_chance)
+			if enemy.take_hit(res, 0) and leech > 0.0:
+				heal(float(res.get("total_hit_damage", 0.0)) * leech)
 
 
 func on_enemy_killed(is_rare: bool, xp_override: int = -1) -> void:

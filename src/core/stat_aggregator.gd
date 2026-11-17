@@ -27,6 +27,12 @@ func add_modifiers(mods: Array) -> void:
 			add_modifier(mod)
 
 
+func clone() -> StatAggregator:
+	var copy := StatAggregator.new()
+	copy.add_modifiers(_modifiers)
+	return copy
+
+
 func has_flag(stat_name: String) -> bool:
 	for mod in _modifiers:
 		if mod.get("stat") == stat_name and mod.get("mod_type") == StatTypes.ModType.FLAG and float(mod.get("value", 0.0)) > 0.0:

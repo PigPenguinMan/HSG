@@ -25,6 +25,7 @@ var _near_waypoint: bool = false
 
 var _inv_panel: InventoryPanel
 var _tree_panel: PassiveTreePanel
+var _skill_panel: SkillPanel
 var _prompt_label: Label
 var _dialog_panel: PanelContainer
 var _dialog_title: Label
@@ -66,7 +67,7 @@ func _build_ui() -> void:
 	var btn_bar := HBoxContainer.new()
 	btn_bar.anchor_left = 1.0
 	btn_bar.anchor_right = 1.0
-	btn_bar.offset_left = -280
+	btn_bar.offset_left = -390
 	btn_bar.offset_top = 12
 	btn_bar.offset_right = -16
 	btn_bar.offset_bottom = 48
@@ -82,6 +83,11 @@ func _build_ui() -> void:
 	tree_btn.text = "패시브 트리 (P)"
 	tree_btn.pressed.connect(_toggle_passive_tree)
 	btn_bar.add_child(tree_btn)
+
+	var skill_btn := Button.new()
+	skill_btn.text = "스킬/룬 (K)"
+	skill_btn.pressed.connect(_toggle_skill_panel)
+	btn_bar.add_child(skill_btn)
 
 	# Boss HP bar (top-center)
 	_boss_bar_box = VBoxContainer.new()
@@ -139,6 +145,11 @@ func _build_ui() -> void:
 	_tree_panel.bind_player(_player)
 	_tree_panel.visibility_changed.connect(_sync_ui_block)
 
+	_skill_panel = SkillPanel.new()
+	center.add_child(_skill_panel)
+	_skill_panel.bind_player(_player)
+	_skill_panel.visibility_changed.connect(_sync_ui_block)
+
 	_dialog_panel = PanelContainer.new()
 	_dialog_panel.custom_minimum_size = Vector2(400, 220)
 	_dialog_panel.visible = false
@@ -176,6 +187,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_toggle_inventory()
 		elif event.keycode == KEY_P:
 			_toggle_passive_tree()
+		elif event.keycode == KEY_K:
+			_toggle_skill_panel()
 		elif event.keycode == KEY_E:
 			_try_interact()
 		elif event.keycode == KEY_ESCAPE:
@@ -185,6 +198,7 @@ func _unhandled_input(event: InputEvent) -> void:
 func _close_all_panels() -> void:
 	_inv_panel.visible = false
 	_tree_panel.visible = false
+	_skill_panel.visible = false
 	_dialog_panel.visible = false
 	_sync_ui_block()
 
@@ -193,6 +207,7 @@ func _toggle_inventory() -> void:
 	_inv_panel.visible = not _inv_panel.visible
 	if _inv_panel.visible:
 		_tree_panel.visible = false
+		_skill_panel.visible = false
 		_dialog_panel.visible = false
 		_inv_panel.refresh()
 	_sync_ui_block()
@@ -202,14 +217,25 @@ func _toggle_passive_tree() -> void:
 	_tree_panel.visible = not _tree_panel.visible
 	if _tree_panel.visible:
 		_inv_panel.visible = false
+		_skill_panel.visible = false
 		_dialog_panel.visible = false
 		_tree_panel.refresh()
 	_sync_ui_block()
 
 
+func _toggle_skill_panel() -> void:
+	_skill_panel.visible = not _skill_panel.visible
+	if _skill_panel.visible:
+		_inv_panel.visible = false
+		_tree_panel.visible = false
+		_dialog_panel.visible = false
+		_skill_panel.refresh()
+	_sync_ui_block()
+
+
 func _sync_ui_block() -> void:
 	if _player != null:
-		_player.ui_blocking_input = _inv_panel.visible or _tree_panel.visible or _dialog_panel.visible
+		_player.ui_blocking_input = _inv_panel.visible or _tree_panel.visible or _skill_panel.visible or _dialog_panel.visible
 
 
 func _process(delta: float) -> void:
@@ -685,6 +711,6 @@ func _on_player_died() -> void:
 func _on_player_stats_changed(hp: float, max_hp: float, mana: float, max_mana: float, flask: int, lv: int, cur_xp: int, next_xp: int) -> void:
 	var zname := str(_zones.get(_current_zone_id, {}).get("name", _current_zone_id))
 	var pts_text := "  |  [패시브 포인트: %d]" % _player.passive_points if _player.passive_points > 0 else ""
-	hud_label.text = "[%s] Lv.%d (XP %d/%d)%s  |  HP: %d/%d  |  Mana: %d/%d  |  물약(1): %d/5  |  처치: %d\n[WASD] 이동  [좌/우클릭] 스킬  [Space] 질주  [E] 대화/이동진  [I] 인벤토리  [P] 패시브" % [
+	hud_label.text = "[%s] Lv.%d (XP %d/%d)%s  |  HP: %d/%d  |  Mana: %d/%d  |  물약(1): %d/5  |  처치: %d\n[WASD] 이동  [좌/우/Q] 스킬  [Space] 질주  [E] 대화/이동진  [I] 인벤  [P] 패시브  [K] 스킬/룬" % [
 		zname, lv, cur_xp, next_xp, pts_text, int(hp), int(max_hp), int(mana), int(max_mana), flask, _kills
 	]

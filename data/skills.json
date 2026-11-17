@@ -1,0 +1,107 @@
+{
+  "version": "0.1.0",
+  "active_skills": [
+    {
+      "id": "crimson_flurry",
+      "name": "핏빛 난무",
+      "slot_type": "COMBAT",
+      "damage_source": "ATTACK_HIT",
+      "tags": ["ATTACK", "MELEE", "AOE", "PHYSICAL", "BLEED"],
+      "base_physical": 26.0,
+      "base_fire": 0.0,
+      "damage_effectiveness": 1.1,
+      "mana_cost": 4.0,
+      "cooldown": 0.34,
+      "aoe_radius": 64.0,
+      "desc": "전방 부채꼴을 베어 물리 피해를 주고 출혈을 유발합니다."
+    },
+    {
+      "id": "crushing_slam",
+      "name": "분쇄의 일격",
+      "slot_type": "COMBAT",
+      "damage_source": "ATTACK_HIT",
+      "tags": ["ATTACK", "MELEE", "AOE", "PHYSICAL"],
+      "base_physical": 42.0,
+      "base_fire": 0.0,
+      "damage_effectiveness": 1.4,
+      "mana_cost": 7.0,
+      "cooldown": 0.56,
+      "aoe_radius": 84.0,
+      "desc": "대지를 강타해 넓은 범위에 강력한 물리 피해와 밀쳐내기를 가합니다."
+    },
+    {
+      "id": "piercing_fang",
+      "name": "관통하는 송곳니",
+      "slot_type": "COMBAT",
+      "damage_source": "ATTACK_HIT",
+      "tags": ["ATTACK", "PROJECTILE", "PHYSICAL"],
+      "base_physical": 22.0,
+      "base_fire": 0.0,
+      "damage_effectiveness": 0.9,
+      "mana_cost": 8.0,
+      "cooldown": 0.30,
+      "projectiles": 3,
+      "desc": "여러 발의 단검 송곳니를 부채꼴로 발사합니다 (단일 대상 1발 명중)."
+    },
+    {
+      "id": "bloodmoon_orb",
+      "name": "혈월의 화염구",
+      "slot_type": "COMBAT",
+      "damage_source": "SPELL_HIT",
+      "tags": ["SPELL", "PROJECTILE", "AOE", "FIRE"],
+      "base_physical": 0.0,
+      "base_fire": 36.0,
+      "damage_effectiveness": 1.2,
+      "mana_cost": 10.0,
+      "cooldown": 0.45,
+      "projectiles": 1,
+      "aoe_radius": 68.0,
+      "desc": "적중 시 폭발하여 범위 화염 피해와 점화를 입히는 주문을 발사합니다."
+    },
+    {
+      "id": "shadow_dash",
+      "name": "그림자 질주",
+      "slot_type": "MOVEMENT",
+      "damage_source": "ATTACK_HIT",
+      "tags": ["ATTACK", "MELEE", "MOVEMENT", "PHYSICAL"],
+      "base_physical": 24.0,
+      "base_fire": 0.0,
+      "damage_effectiveness": 1.0,
+      "mana_cost": 0.0,
+      "cooldown": 1.2,
+      "desc": "빠르게 돌진하며 경로상의 적들을 베어 물리 피해를 줍니다."
+    }
+  ],
+  "support_runes": [
+    {
+      "id": "rune_volley",
+      "name": "다중 투사체",
+      "required_tags": ["PROJECTILE"],
+      "extra_projectiles": 2,
+      "damage_more": -20.0,
+      "desc": "[Projectile] 투사체 +2발 추가, 피해 20% 감폭"
+    },
+    {
+      "id": "rune_savagery",
+      "name": "포악한 공격",
+      "required_tags": ["PHYSICAL"],
+      "phys_more": 35.0,
+      "cannot_non_phys": true,
+      "desc": "[Physical] 물리 피해 +35% 증폭 (원소/혼돈 피해 불가)"
+    },
+    {
+      "id": "rune_wide_area",
+      "name": "광역 증가",
+      "required_tags": ["AOE"],
+      "aoe_mult": 1.35,
+      "desc": "[AoE] 범위 스킬 반경 +35% 증가"
+    },
+    {
+      "id": "rune_blood_drain",
+      "name": "생명력 흡수",
+      "required_tags": ["ATTACK", "SPELL"],
+      "leech_pct": 0.03,
+      "desc": "[Attack/Spell] 타격 피해의 3%를 생명력으로 흡수"
+    }
+  ]
+}
