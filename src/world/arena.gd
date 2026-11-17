@@ -23,9 +23,11 @@ var _hor_reward_claimed: bool = false
 var _near_npc: Dictionary = {}
 var _near_waypoint: bool = false
 
+const SkillPanelScript := preload("res://src/ui/skill_panel.gd")
+
 var _inv_panel: InventoryPanel
 var _tree_panel: PassiveTreePanel
-var _skill_panel: SkillPanel
+var _skill_panel: SkillPanelScript
 var _prompt_label: Label
 var _dialog_panel: PanelContainer
 var _dialog_title: Label
@@ -145,7 +147,7 @@ func _build_ui() -> void:
 	_tree_panel.bind_player(_player)
 	_tree_panel.visibility_changed.connect(_sync_ui_block)
 
-	_skill_panel = SkillPanel.new()
+	_skill_panel = SkillPanelScript.new()
 	center.add_child(_skill_panel)
 	_skill_panel.bind_player(_player)
 	_skill_panel.visibility_changed.connect(_sync_ui_block)
