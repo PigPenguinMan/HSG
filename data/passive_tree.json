@@ -8,72 +8,151 @@
       "race": "WOLF",
       "position": { "x": 0, "y": 0 },
       "stats": [],
-      "adjacentIds": ["node_dex_01", "node_life_01"]
+      "adjacentIds": ["node_dex_01", "node_life_01", "node_phys_01"]
     },
     {
       "id": "node_dex_01",
       "name": "날카로운 감각",
       "type": "MINOR",
-      "position": { "x": 80, "y": -40 },
+      "position": { "x": 90, "y": -45 },
       "stats": [
         { "stat": "DEX", "modType": "FLAT", "value": 10 },
         { "stat": "ACCURACY", "modType": "INCREASED", "value": 12 }
       ],
-      "adjacentIds": ["node_wolf_start", "node_notable_fang", "node_life_01"]
+      "adjacentIds": ["node_wolf_start", "node_atk_spd_01", "node_life_01"]
     },
     {
-      "id": "node_life_01",
-      "name": "야수의 활력",
+      "id": "node_atk_spd_01",
+      "name": "민첩한 발톱",
       "type": "MINOR",
-      "position": { "x": 40, "y": 60 },
+      "position": { "x": 170, "y": -85 },
       "stats": [
-        { "stat": "MAX_LIFE", "modType": "INCREASED", "value": 8 }
+        { "stat": "ATTACK_SPEED", "modType": "INCREASED", "value": 8 },
+        { "stat": "DEX", "modType": "FLAT", "value": 8 }
       ],
-      "adjacentIds": ["node_wolf_start", "node_dex_01", "node_apex_lone_wolf"]
+      "adjacentIds": ["node_dex_01", "node_notable_fang", "node_crit_01"]
+    },
+    {
+      "id": "node_crit_01",
+      "name": "약점 포착",
+      "type": "MINOR",
+      "position": { "x": 250, "y": -45 },
+      "stats": [
+        { "stat": "CRIT_CHANCE", "modType": "INCREASED", "value": 25 },
+        { "stat": "CRIT_MULTIPLIER", "modType": "FLAT", "value": 15 }
+      ],
+      "adjacentIds": ["node_atk_spd_01", "node_apex_feral_precision"]
     },
     {
       "id": "node_notable_fang",
       "name": "굶주린 송곳니",
       "type": "NOTABLE",
-      "position": { "x": 160, "y": -80 },
+      "position": { "x": 230, "y": -155 },
       "stats": [
         { "stat": "PHYSICAL_DAMAGE", "modType": "INCREASED", "value": 24 },
         { "stat": "BLEED_CHANCE", "modType": "FLAT", "value": 20 }
       ],
-      "adjacentIds": ["node_dex_01", "node_apex_feral_precision"]
-    },
-    {
-      "id": "node_apex_lone_wolf",
-      "name": "고독한 늑대",
-      "type": "APEX",
-      "position": { "x": 140, "y": 130 },
-      "stats": [
-        { "stat": "DISABLE_MINIONS", "modType": "FLAG", "value": 1 },
-        { "stat": "DAMAGE_TAKEN", "modType": "MORE", "value": -10 },
-        { "stat": "MOVEMENT_SPEED", "modType": "INCREASED", "value": 15 }
-      ],
-      "adjacentIds": ["node_life_01"]
+      "adjacentIds": ["node_atk_spd_01", "node_apex_feral_precision"]
     },
     {
       "id": "node_apex_feral_precision",
       "name": "야수의 직감",
       "type": "APEX",
-      "position": { "x": 240, "y": -110 },
+      "position": { "x": 330, "y": -120 },
       "stats": [
         { "stat": "ALWAYS_HITS", "modType": "FLAG", "value": 1 },
         { "stat": "CANNOT_CRIT", "modType": "FLAG", "value": 1 }
       ],
-      "adjacentIds": ["node_notable_fang"]
+      "adjacentIds": ["node_notable_fang", "node_crit_01"]
+    },
+    {
+      "id": "node_life_01",
+      "name": "야수의 활력",
+      "type": "MINOR",
+      "position": { "x": 50, "y": 75 },
+      "stats": [
+        { "stat": "MAX_LIFE", "modType": "INCREASED", "value": 8 },
+        { "stat": "MAX_LIFE", "modType": "FLAT", "value": 15 }
+      ],
+      "adjacentIds": ["node_wolf_start", "node_dex_01", "node_ms_01", "node_armour_01"]
+    },
+    {
+      "id": "node_ms_01",
+      "name": "질주 본능",
+      "type": "MINOR",
+      "position": { "x": 140, "y": 100 },
+      "stats": [
+        { "stat": "MOVEMENT_SPEED", "modType": "INCREASED", "value": 8 },
+        { "stat": "EVASION", "modType": "INCREASED", "value": 12 }
+      ],
+      "adjacentIds": ["node_life_01", "node_apex_lone_wolf"]
+    },
+    {
+      "id": "node_apex_lone_wolf",
+      "name": "고독한 늑대",
+      "type": "APEX",
+      "position": { "x": 230, "y": 140 },
+      "stats": [
+        { "stat": "DISABLE_MINIONS", "modType": "FLAG", "value": 1 },
+        { "stat": "DAMAGE_TAKEN", "modType": "MORE", "value": -10 },
+        { "stat": "MOVEMENT_SPEED", "modType": "INCREASED", "value": 15 }
+      ],
+      "adjacentIds": ["node_ms_01"]
+    },
+    {
+      "id": "node_armour_01",
+      "name": "거친 모피",
+      "type": "MINOR",
+      "position": { "x": -40, "y": 135 },
+      "stats": [
+        { "stat": "ARMOUR", "modType": "FLAT", "value": 40 },
+        { "stat": "MAX_LIFE", "modType": "INCREASED", "value": 6 }
+      ],
+      "adjacentIds": ["node_life_01", "node_notable_blood_pelt"]
+    },
+    {
+      "id": "node_notable_blood_pelt",
+      "name": "피의 갑주",
+      "type": "NOTABLE",
+      "position": { "x": -125, "y": 170 },
+      "stats": [
+        { "stat": "MAX_LIFE", "modType": "FLAT", "value": 35 },
+        { "stat": "MAX_LIFE", "modType": "INCREASED", "value": 14 }
+      ],
+      "adjacentIds": ["node_armour_01", "node_apex_bloodthirst"]
     },
     {
       "id": "node_apex_bloodthirst",
       "name": "피의 갈증",
       "type": "APEX",
-      "position": { "x": -140, "y": 100 },
+      "position": { "x": -220, "y": 135 },
       "stats": [
-        { "stat": "BLOODTHIRST", "modType": "FLAG", "value": 1 }
+        { "stat": "BLOODTHIRST", "modType": "FLAG", "value": 1 },
+        { "stat": "PHYSICAL_DAMAGE", "modType": "MORE", "value": 25 }
       ],
-      "adjacentIds": ["node_life_01"]
+      "adjacentIds": ["node_notable_blood_pelt", "node_bleed_01"]
+    },
+    {
+      "id": "node_phys_01",
+      "name": "단련된 이빨",
+      "type": "MINOR",
+      "position": { "x": -90, "y": -30 },
+      "stats": [
+        { "stat": "PHYSICAL_DAMAGE", "modType": "INCREASED", "value": 14 },
+        { "stat": "STR", "modType": "FLAT", "value": 8 }
+      ],
+      "adjacentIds": ["node_wolf_start", "node_bleed_01"]
+    },
+    {
+      "id": "node_bleed_01",
+      "name": "찢어발기기",
+      "type": "NOTABLE",
+      "position": { "x": -175, "y": 35 },
+      "stats": [
+        { "stat": "AILMENT_DAMAGE", "modType": "INCREASED", "value": 30 },
+        { "stat": "BLEED_CHANCE", "modType": "FLAT", "value": 25 }
+      ],
+      "adjacentIds": ["node_phys_01", "node_apex_bloodthirst"]
     }
   ]
 }
