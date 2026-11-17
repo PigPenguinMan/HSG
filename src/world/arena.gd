@@ -78,16 +78,19 @@ func _build_ui() -> void:
 
 	var inv_btn := Button.new()
 	inv_btn.text = "인벤토리 (I)"
+	inv_btn.focus_mode = Control.FOCUS_NONE
 	inv_btn.pressed.connect(_toggle_inventory)
 	btn_bar.add_child(inv_btn)
 
 	var tree_btn := Button.new()
 	tree_btn.text = "패시브 트리 (P)"
+	tree_btn.focus_mode = Control.FOCUS_NONE
 	tree_btn.pressed.connect(_toggle_passive_tree)
 	btn_bar.add_child(tree_btn)
 
 	var skill_btn := Button.new()
 	skill_btn.text = "스킬/룬 (K)"
+	skill_btn.focus_mode = Control.FOCUS_NONE
 	skill_btn.pressed.connect(_toggle_skill_panel)
 	btn_bar.add_child(skill_btn)
 
@@ -185,15 +188,16 @@ func _build_ui() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_I:
+		var kc := event.physical_keycode if event.physical_keycode != KEY_NONE else event.keycode
+		if kc == KEY_I:
 			_toggle_inventory()
-		elif event.keycode == KEY_P:
+		elif kc == KEY_P:
 			_toggle_passive_tree()
-		elif event.keycode == KEY_K:
+		elif kc == KEY_K:
 			_toggle_skill_panel()
-		elif event.keycode == KEY_E:
+		elif kc == KEY_E:
 			_try_interact()
-		elif event.keycode == KEY_ESCAPE:
+		elif kc == KEY_ESCAPE or event.keycode == KEY_ESCAPE:
 			_close_all_panels()
 
 
@@ -300,6 +304,7 @@ func _build_ground(sz: Vector2, base_col: Color) -> void:
 	var bg := TextureRect.new()
 	bg.texture = load("res://assets/sprites/ground_tile.png")
 	bg.stretch_mode = TextureRect.STRETCH_TILE
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	bg.size = sz
 	bg.modulate = Color(base_col.r * 5.2, base_col.g * 5.2, base_col.b * 5.2, 1.0)
 	bg.z_index = -12

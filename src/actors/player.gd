@@ -269,10 +269,10 @@ func _physics_process(delta: float) -> void:
 			_trigger_slot("LMB", mouse_dir, cd_scale)
 		elif Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 			_trigger_slot("RMB", mouse_dir, cd_scale)
-		elif Input.is_key_pressed(KEY_Q):
+		elif Input.is_physical_key_pressed(KEY_Q):
 			_trigger_slot("Q", mouse_dir, cd_scale)
 
-	if Input.is_key_pressed(KEY_1) and flask_charges > 0 and hp < max_hp:
+	if Input.is_physical_key_pressed(KEY_1) and flask_charges > 0 and hp < max_hp:
 		flask_charges -= 1
 		hp = minf(max_hp, hp + 45.0)
 
