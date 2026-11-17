@@ -188,7 +188,8 @@ func _build_ui() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
-		var kc := event.physical_keycode if event.physical_keycode != KEY_NONE else event.keycode
+		var key_ev := event as InputEventKey
+		var kc: int = key_ev.physical_keycode if key_ev.physical_keycode != KEY_NONE else key_ev.keycode
 		if kc == KEY_I:
 			_toggle_inventory()
 		elif kc == KEY_P:
