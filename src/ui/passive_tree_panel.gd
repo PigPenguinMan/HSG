@@ -21,7 +21,7 @@ func bind_player(p: Player) -> void:
 
 
 func refresh() -> void:
-	if player == null:
+	if player == null or not is_node_ready():
 		return
 	_header_label.text = "본능의 성좌 (패시브 트리) — 잔여 포인트: %d  |  [좌클릭] 습득  [우클릭] 환불  [드래그] 이동  [휠] 줌" % player.passive_points
 	_canvas.queue_redraw()

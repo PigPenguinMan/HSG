@@ -61,14 +61,14 @@ func _build_phase2_ui() -> void:
 	hud_layer.add_child(center)
 
 	_inv_panel = InventoryPanel.new()
+	center.add_child(_inv_panel)
 	_inv_panel.bind_player(_player)
 	_inv_panel.visibility_changed.connect(_sync_ui_block)
-	center.add_child(_inv_panel)
 
 	_tree_panel = PassiveTreePanel.new()
+	center.add_child(_tree_panel)
 	_tree_panel.bind_player(_player)
 	_tree_panel.visibility_changed.connect(_sync_ui_block)
-	center.add_child(_tree_panel)
 
 
 func _unhandled_input(event: InputEvent) -> void:

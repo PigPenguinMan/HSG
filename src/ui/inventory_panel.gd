@@ -140,7 +140,7 @@ func _build_ui() -> void:
 
 
 func refresh() -> void:
-	if player == null:
+	if player == null or not is_node_ready():
 		return
 
 	var slot_labels := {
