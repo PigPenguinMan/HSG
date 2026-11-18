@@ -23,6 +23,7 @@ var _hor_reward_claimed: bool = false
 var _near_npc: Dictionary = {}
 var _near_waypoint: bool = false
 
+const BalanceDBScript := preload("res://src/core/balance_db.gd")
 const InventoryPanelScript := preload("res://src/ui/inventory_panel.gd")
 const PassiveTreePanelScript := preload("res://src/ui/passive_tree_panel.gd")
 const SkillPanelScript := preload("res://src/ui/skill_panel.gd")
@@ -624,12 +625,14 @@ func _open_waypoint_dialog() -> void:
 
 
 func _spawn_zone_packs(sz: Vector2, safe_pos: Vector2, pack_count: int, rare_chance: float, mlvl: int) -> void:
+	var drops_bal: Dictionary = BalanceDBScript.get_section("drops")
+	var pack_size: int = int(drops_bal.get("pack_size", 4))
 	for _p in range(pack_count):
 		var center := Vector2(randf_range(180, sz.x - 180), randf_range(160, sz.y - 160))
 		if center.distance_to(safe_pos) < 340.0:
 			center.x = clampf(center.x + 420.0, 180, sz.x - 180)
 		var with_rare := randf() < rare_chance
-		for i in range(4):
+		for i in range(pack_size):
 			var enemy := Enemy.new()
 			enemy.is_rare = with_rare and i == 0
 			enemy.monster_level = mlvl
@@ -654,13 +657,14 @@ func _spawn_boss(pos: Vector2, mlvl: int) -> void:
 	_boss_hp_bar.size.x = 360.0
 
 
-func _on_boss_died(_enemy: Enemy, pos: Vector2, _is_rare: bool) -> void:
+func _on_boss_died(enemy: Enemy, pos: Vector2, _is_rare: bool) -> void:
 	_boss_defeated = true
 	_boss_bar_box.visible = false
 	_kills += 1
-	_player.on_enemy_killed(true, 300)
-	_player.add_currency(StatTypes.CurrencyType.BLOODSTONE_OF_ZENITH, 1)
-	_player.add_currency(StatTypes.CurrencyType.BLOODSTONE_OF_FORGE, 2)
+	var drops_bal: Dictionary = BalanceDBScript.get_section("drops")
+	_player.on_enemy_killed(true, enemy.xp_reward)
+	_player.add_currency(StatTypes.CurrencyType.BLOODSTONE_OF_ZENITH, int(drops_bal.get("boss_zenith_drop", 1)))
+	_player.add_currency(StatTypes.CurrencyType.BLOODSTONE_OF_FORGE, int(drops_bal.get("boss_forge_drop", 2)))
 	_drop_item(pos, true)
 	_push_log("철갑 브룬 처치! 야영지의 호르에게 돌아가세요.")
 
@@ -669,7 +673,11 @@ func _on_enemy_died(enemy: Enemy, pos: Vector2, is_rare: bool) -> void:
 	_kills += 1
 	_player.on_enemy_killed(is_rare, enemy.xp_reward)
 
-	if is_rare or randf() < 0.25:
+	var drops_bal: Dictionary = BalanceDBScript.get_section("drops")
+	var cur_chance: float = float(drops_bal.get("currency_drop_chance", 0.25))
+	var item_chance: float = float(drops_bal.get("item_drop_chance", 0.45))
+
+	if is_rare or randf() < cur_chance:
 		var currencies := [
 			StatTypes.CurrencyType.BLOODSTONE_OF_SHIFT,
 			StatTypes.CurrencyType.BLOODSTONE_OF_FORGE,
@@ -679,18 +687,19 @@ func _on_enemy_died(enemy: Enemy, pos: Vector2, is_rare: bool) -> void:
 		]
 		_player.add_currency(currencies[randi() % currencies.size()], 1)
 
-	if is_rare or randf() < 0.45:
+	if is_rare or randf() < item_chance:
 		_drop_item(pos, is_rare)
 
 
 func _drop_item(pos: Vector2, force_rare: bool) -> void:
 	_loot_seed += 1
+	var drops_bal: Dictionary = BalanceDBScript.get_section("drops")
 	var slots := ["WEAPON", "ARMOUR", "BOOTS", "RING", "AMULET"]
 	var slot: String = slots[_loot_seed % slots.size()]
 	var item := _item_gen.create_normal_item("base_wolf_" + slot.to_lower(), slot, _player.level + 2, _loot_seed)
 	if force_rare:
 		_item_gen.apply_currency(item, StatTypes.CurrencyType.BLOODSTONE_OF_FORGE)
-	elif randf() < 0.6:
+	elif randf() < float(drops_bal.get("magic_upgrade_chance", 0.6)):
 		_item_gen.apply_currency(item, StatTypes.CurrencyType.BLOODSTONE_OF_SHIFT)
 
 	var drop := LootDrop.new()

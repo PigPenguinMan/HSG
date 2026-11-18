@@ -6,10 +6,16 @@ signal rpg_state_changed()
 signal player_died()
 
 const MAX_INVENTORY_SLOTS: int = 24
-const BASE_HP: float = 100.0
-const BASE_MANA: float = 60.0
-const BASE_ARMOUR: float = 50.0
-const BASE_MOVE_SPEED: float = 210.0
+const BalanceDBScript := preload("res://src/core/balance_db.gd")
+
+var _bal: Dictionary = {}
+var base_hp: float = 100.0
+var base_mana: float = 60.0
+var base_armour: float = 50.0
+var base_move_speed: float = 210.0
+var base_str: float = 14.0
+var base_dex: float = 24.0
+var base_int: float = 10.0
 
 var stats := StatAggregator.new()
 var passive_tree := PassiveTreeGraph.new()
@@ -76,6 +82,18 @@ func _ready() -> void:
 	collision_layer = 1
 	collision_mask = 2 | 4
 
+	_bal = BalanceDBScript.get_section("player")
+	base_hp = float(_bal.get("base_hp", 100.0))
+	base_mana = float(_bal.get("base_mana", 60.0))
+	base_armour = float(_bal.get("base_armour", 50.0))
+	base_move_speed = float(_bal.get("base_move_speed", 210.0))
+	var b_attrs: Dictionary = _bal.get("base_attributes", {})
+	base_str = float(b_attrs.get("str", 14.0))
+	base_dex = float(b_attrs.get("dex", 24.0))
+	base_int = float(b_attrs.get("int", 10.0))
+	xp_to_next = int(_bal.get("xp_to_next_base", 100))
+	passive_points = int(_bal.get("starting_passive_points", 2))
+
 	passive_tree.load_from_json_file("res://data/passive_tree.json")
 	item_gen.load_affixes_from_json_file("res://data/affixes.json")
 	_load_skills_db()
@@ -103,9 +121,10 @@ func _ready() -> void:
 func recalculate_stats() -> void:
 	stats.clear()
 	# Wolf innate bonuses
-	stats.add_modifier(StatTypes.make_mod("PHYSICAL_DAMAGE", StatTypes.ModType.INCREASED, 25.0, "wolf_innate"))
-	stats.add_modifier(StatTypes.make_mod("BLEED_CHANCE", StatTypes.ModType.FLAT, 40.0, "wolf_innate"))
-	stats.add_modifier(StatTypes.make_mod("AILMENT_DAMAGE", StatTypes.ModType.INCREASED, 20.0, "wolf_innate"))
+	var innate: Dictionary = _bal.get("wolf_innate", {})
+	stats.add_modifier(StatTypes.make_mod("PHYSICAL_DAMAGE", StatTypes.ModType.INCREASED, float(innate.get("physical_damage_increased", 25.0)), "wolf_innate"))
+	stats.add_modifier(StatTypes.make_mod("BLEED_CHANCE", StatTypes.ModType.FLAT, float(innate.get("bleed_chance_flat", 40.0)), "wolf_innate"))
+	stats.add_modifier(StatTypes.make_mod("AILMENT_DAMAGE", StatTypes.ModType.INCREASED, float(innate.get("ailment_damage_increased", 20.0)), "wolf_innate"))
 
 	# Passive tree
 	passive_tree.collect_modifiers(stats)
@@ -116,19 +135,19 @@ func recalculate_stats() -> void:
 		if item is Dictionary:
 			_collect_item_mods(item)
 
-	var attrs := stats.compute_attributes(14.0, 24.0, 10.0)
-	var level_life := float(level - 1) * 12.0
-	max_hp = stats.get_stat("MAX_LIFE", BASE_HP + level_life + attrs["LIFE_FROM_STR"])
+	var attrs := stats.compute_attributes(base_str, base_dex, base_int)
+	var level_life := float(level - 1) * float(_bal.get("life_per_level", 12.0))
+	max_hp = stats.get_stat("MAX_LIFE", base_hp + level_life + attrs["LIFE_FROM_STR"])
 	if stats.has_flag("BLOODTHIRST"):
 		max_mana = 0.0
 		mana = 0.0
 	else:
-		max_mana = stats.get_stat("MAX_MANA", BASE_MANA + attrs["MANA_FROM_INT"])
+		max_mana = stats.get_stat("MAX_MANA", base_mana + attrs["MANA_FROM_INT"])
 		mana = minf(mana, max_mana)
 
 	hp = minf(hp, max_hp)
-	armour = stats.get_stat("ARMOUR", BASE_ARMOUR)
-	move_speed = stats.get_stat("MOVEMENT_SPEED", BASE_MOVE_SPEED)
+	armour = stats.get_stat("ARMOUR", base_armour)
+	move_speed = stats.get_stat("MOVEMENT_SPEED", base_move_speed)
 
 	_emit_stats()
 	rpg_state_changed.emit()
@@ -230,7 +249,7 @@ func _physics_process(delta: float) -> void:
 	_attack_cd = maxf(0.0, _attack_cd - delta)
 	_dash_cd = maxf(0.0, _dash_cd - delta)
 	if not stats.has_flag("BLOODTHIRST"):
-		mana = minf(max_mana, mana + 8.0 * delta)
+		mana = minf(max_mana, mana + float(_bal.get("mana_regen_per_sec", 8.0)) * delta)
 
 	if ui_blocking_input:
 		velocity = Vector2.ZERO
@@ -238,7 +257,7 @@ func _physics_process(delta: float) -> void:
 
 	if _dash_timer > 0.0:
 		_dash_timer -= delta
-		velocity = _dash_dir * 620.0
+		velocity = _dash_dir * float(_bal.get("dash_speed", 620.0))
 		move_and_slide()
 		if not in_town:
 			_shadow_dash_tick()
@@ -269,8 +288,8 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_action_just_pressed("skill_dash") and _dash_cd <= 0.0:
 		_dash_dir = mouse_dir if input_dir == Vector2.ZERO else input_dir
-		_dash_timer = 0.16
-		_dash_cd = 1.2
+		_dash_timer = float(_bal.get("dash_duration", 0.16))
+		_dash_cd = float(_bal.get("dash_cooldown", 1.2))
 		_dash_hit_ids.clear()
 
 	var atk_speed_mult: float = stats.get_stat("ATTACK_SPEED", 1.0)
@@ -286,7 +305,7 @@ func _physics_process(delta: float) -> void:
 
 	if Input.is_physical_key_pressed(KEY_1) and flask_charges > 0 and hp < max_hp:
 		flask_charges -= 1
-		hp = minf(max_hp, hp + 45.0)
+		hp = minf(max_hp, hp + float(_bal.get("flask_heal", 45.0)))
 
 	_emit_stats()
 
@@ -448,7 +467,8 @@ func _exec_melee_cone(sdef: Dictionary, ctx: Dictionary, aim_dir: Vector2, col: 
 	var p_stats: StatAggregator = ctx["stats"]
 	var leech := float(ctx["leech_pct"])
 	var pskill := _to_pipeline_skill(sdef)
-	var crit_chance: float = clampf(0.15 * p_stats.get_stat("CRIT_CHANCE", 1.0), 0.0, 1.0)
+	var base_crit: float = float(_bal.get("base_crit_chance", 0.15))
+	var crit_chance: float = clampf(base_crit * p_stats.get_stat("CRIT_CHANCE", 1.0), 0.0, 1.0)
 
 	for node in get_tree().get_nodes_in_group("enemies"):
 		var enemy := node as Enemy
@@ -467,7 +487,8 @@ func _exec_projectiles(sdef: Dictionary, ctx: Dictionary, aim_dir: Vector2, col:
 	var group_id := _shot_group_counter
 	var p_stats: StatAggregator = ctx["stats"]
 	var pskill := _to_pipeline_skill(sdef)
-	var crit_chance: float = clampf(0.15 * p_stats.get_stat("CRIT_CHANCE", 1.0), 0.0, 1.0)
+	var base_crit: float = float(_bal.get("base_crit_chance", 0.15))
+	var crit_chance: float = clampf(base_crit * p_stats.get_stat("CRIT_CHANCE", 1.0), 0.0, 1.0)
 	var res := DamagePipeline.calculate_hit(p_stats, {"armour": 15.0, "evasion": 0.0}, pskill, randf() < crit_chance)
 
 	var count: int = int(sdef.get("projectiles", 1)) + int(ctx["extra_proj"])
@@ -496,7 +517,8 @@ func _shadow_dash_tick() -> void:
 	var p_stats: StatAggregator = ctx["stats"]
 	var leech := float(ctx["leech_pct"])
 	var pskill := _to_pipeline_skill(sdef)
-	var crit_chance: float = clampf(0.15 * p_stats.get_stat("CRIT_CHANCE", 1.0), 0.0, 1.0)
+	var base_crit: float = float(_bal.get("base_crit_chance", 0.15))
+	var crit_chance: float = clampf(base_crit * p_stats.get_stat("CRIT_CHANCE", 1.0), 0.0, 1.0)
 
 	for node in get_tree().get_nodes_in_group("enemies"):
 		var enemy := node as Enemy
@@ -510,14 +532,17 @@ func _shadow_dash_tick() -> void:
 
 
 func on_enemy_killed(is_rare: bool, xp_override: int = -1) -> void:
-	flask_charges = mini(5, flask_charges + (2 if is_rare else 1))
+	var max_flask: int = int(_bal.get("flask_max_charges", 5))
+	flask_charges = mini(max_flask, flask_charges + (2 if is_rare else 1))
 	var gained_xp := xp_override if xp_override >= 0 else (90 if is_rare else 25)
 	xp += gained_xp
-	while xp >= xp_to_next and level < 20:
+	var max_lv: int = int(_bal.get("max_level", 20))
+	var xp_mult: float = float(_bal.get("xp_level_multiplier", 1.45))
+	while xp >= xp_to_next and level < max_lv:
 		xp -= xp_to_next
 		level += 1
 		passive_points += 1
-		xp_to_next = int(float(xp_to_next) * 1.45)
+		xp_to_next = int(float(xp_to_next) * xp_mult)
 		recalculate_stats()
 		hp = max_hp
 		mana = max_mana
@@ -568,7 +593,7 @@ func take_damage(raw_phys: float) -> void:
 	if hp <= 0.0:
 		hp = max_hp
 		mana = max_mana
-		flask_charges = 5
+		flask_charges = int(_bal.get("flask_max_charges", 5))
 		player_died.emit()
 	_emit_stats()
 

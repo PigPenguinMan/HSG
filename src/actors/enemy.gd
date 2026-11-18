@@ -3,7 +3,11 @@ extends CharacterBody2D
 
 signal died(enemy: Enemy, position: Vector2, is_rare: bool)
 
-const AGGRO_RADIUS: float = 360.0
+const BalanceDBScript := preload("res://src/core/balance_db.gd")
+
+var _enemy_bal: Dictionary = {}
+var aggro_radius: float = 360.0
+var attack_cd_base: float = 1.1
 
 var is_rare: bool = false
 var monster_level: int = 1
@@ -38,13 +42,17 @@ func _ready() -> void:
 	collision_layer = 2
 	collision_mask = 1 | 2 | 4
 
+	_enemy_bal = BalanceDBScript.get_section("enemies")
+	aggro_radius = float(_enemy_bal.get("aggro_radius", 360.0))
+
 	_setup_stats()
 	# Monster level scaling (level 1 = base)
+	var scaling: Dictionary = _enemy_bal.get("level_scaling", {})
 	var lv := float(maxi(monster_level, 1) - 1)
-	max_hp *= 1.0 + 0.18 * lv
-	attack_damage *= 1.0 + 0.12 * lv
-	armour *= 1.0 + 0.1 * lv
-	xp_reward = int(float(xp_reward) * (1.0 + 0.15 * lv))
+	max_hp *= 1.0 + float(scaling.get("hp_per_level", 0.18)) * lv
+	attack_damage *= 1.0 + float(scaling.get("damage_per_level", 0.12)) * lv
+	armour *= 1.0 + float(scaling.get("armour_per_level", 0.10)) * lv
+	xp_reward = int(float(xp_reward) * (1.0 + float(scaling.get("xp_per_level", 0.15)) * lv))
 	hp = max_hp
 
 	var col := CollisionShape2D.new()
@@ -68,17 +76,30 @@ func _ready() -> void:
 
 ## Override in subclasses to set base stats before level scaling.
 func _setup_stats() -> void:
+	var tier_key: String = "rare" if is_rare else "normal"
+	var cfg: Dictionary = _enemy_bal.get(tier_key, {})
 	if is_rare:
-		max_hp = 220.0
-		move_speed = 115.0
-		attack_damage = 18.0
-		armour = 60.0
+		max_hp = float(cfg.get("max_hp", 220.0))
+		move_speed = float(cfg.get("move_speed", 115.0))
+		attack_damage = float(cfg.get("attack_damage", 18.0))
+		armour = float(cfg.get("armour", 60.0))
+		evasion = float(cfg.get("evasion", 10.0))
 		body_size = 24.0
-		xp_reward = 90
-		knockback_resist = 0.5
+		xp_reward = int(cfg.get("xp_reward", 90))
+		knockback_resist = float(cfg.get("knockback_resist", 0.5))
+		attack_cd_base = float(cfg.get("attack_cooldown", 1.1))
 		sprite_path = "res://assets/sprites/enemy_rare.png"
 		sprite_scale = 1.05
 		base_color = Color(0.85, 0.65, 0.15)
+	else:
+		max_hp = float(cfg.get("max_hp", 60.0))
+		move_speed = float(cfg.get("move_speed", 95.0))
+		attack_damage = float(cfg.get("attack_damage", 10.0))
+		armour = float(cfg.get("armour", 20.0))
+		evasion = float(cfg.get("evasion", 10.0))
+		xp_reward = int(cfg.get("xp_reward", 25))
+		knockback_resist = float(cfg.get("knockback_resist", 0.0))
+		attack_cd_base = float(cfg.get("attack_cooldown", 1.1))
 
 
 func _physics_process(delta: float) -> void:
@@ -119,7 +140,7 @@ func _physics_process(delta: float) -> void:
 		return
 	var to_player := player.global_position - global_position
 	if not aggro:
-		if to_player.length() > AGGRO_RADIUS:
+		if to_player.length() > aggro_radius:
 			return
 		aggro = true
 	_ai(delta, player, to_player)
@@ -135,7 +156,7 @@ func _ai(_delta: float, player: Node2D, to_player: Vector2) -> void:
 		if _knockback_vel.length() > 5.0:
 			move_and_slide()
 		if attack_cooldown <= 0.0 and player.has_method("take_damage"):
-			attack_cooldown = 1.1
+			attack_cooldown = attack_cd_base
 			player.take_damage(attack_damage)
 
 
@@ -170,15 +191,16 @@ func take_hit(hit_result: Dictionary, shot_group_id: int = 0) -> bool:
 		else:
 			player.shake(1.6, 0.08)
 
+	var ailments: Dictionary = _enemy_bal.get("ailment_duration", {})
 	var incoming_bleed: float = float(hit_result.get("bleed_dps", 0.0))
 	if incoming_bleed > bleed_dps:
 		bleed_dps = incoming_bleed
-		bleed_timer = 4.0
+		bleed_timer = float(ailments.get("bleed", 4.0))
 
 	var incoming_ignite: float = float(hit_result.get("ignite_dps", 0.0))
 	if incoming_ignite > ignite_dps:
 		ignite_dps = incoming_ignite
-		ignite_timer = 4.0
+		ignite_timer = float(ailments.get("ignite", 4.0))
 
 	_update_hp_bar()
 	if hp <= 0.0:

@@ -162,3 +162,20 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
 
 ### 7.3 보류
 - **(P1) 밸런스 수치 `data/` 분리**: 아직 사용자 결정 대기입니다. Claude 추천은 v0.1에서 바로 `data/balance.json`으로 분리하는 것입니다(플레이테스트 중 튜닝이 잦고, 수치를 바꿀 때마다 두 에이전트가 같은 스크립트를 고치다 충돌할 위험이 있기 때문). 확정되면 구현은 Antigravity가 맡고, 분리 전후 수치가 같은지는 Claude가 테스트로 검증합니다.
+
+---
+
+## 8. Antigravity 작업 보고 (2026-11-18, main @ 405038e) — 밸런스 데이터 JSON 분리
+
+### 반영 완료 (사용자 지시로 7.3 확정 구현)
+- **`data/balance.json` 신설**: 플레이어(`player`), 몬스터(`enemies`), 보스 브룬(`boss_brun`), 드롭/팩(`drops`) 밸런스 수치를 JSON으로 분리
+- **`src/core/balance_db.gd` 신설**: `RefCounted` 기반 순수 JSON 로더 (`BalanceDB`, 캐시 + `get_section()`)
+- **적용 파일**:
+  - `src/actors/player.gd`: 기본 HP/마나/방어/이속/속성, 늑대 선천 보너스, 기본 치명타 확률, 마나 재생, 대시/물약/레벨업 곡선을 `BalanceDB`에서 로드
+  - `src/actors/enemy.gd`: 일반/희귀 몬스터 스탯, 레벨당 스케일링, 어그로 반경, 상태이상(출혈/점화) 지속시간을 `BalanceDB`에서 로드
+  - `src/actors/boss_brun.gd`: 브룬 기본 스탯, 광폭화/도약/돌진/충격파 쿨타임·배율을 `BalanceDB`에서 로드
+  - `src/world/arena.gd`: 팩 크기, 화폐/장비/매직 승급 드롭률, 보스 화폐 드롭을 `BalanceDB`에서 로드
+  - `src/ui/inventory_panel.gd`: `player.base_str / base_dex / base_int` 참조로 통일
+- **정적 검사 결과**: `balance.json` 파싱 정상, `SPACE_INDENTS: 0`, `UNTYPED_FUNCS: 0`, `UNTYPED_VARS: 0`, `POE_TERMS: 0`
+- **테스트 실행 여부**: **테스트 미실행** (원격 VM에 `godot` 바이너리 없음)
+- **테스트 필요**: `BalanceDB.ensure_loaded()` / `BalanceDB.get_section()` (`src/core/balance_db.gd`) 및 `data/balance.json` 분리 전후 수치 일치 검증 (Claude 담당)

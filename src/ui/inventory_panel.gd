@@ -182,7 +182,7 @@ func refresh() -> void:
 		btn.text = "%s (%d)" % [cur_names[ctype], cnt]
 		btn.button_pressed = (_selected_currency == ctype)
 
-	var attrs := player.stats.compute_attributes(14.0, 24.0, 10.0)
+	var attrs := player.stats.compute_attributes(player.base_str, player.base_dex, player.base_int)
 	var phys_inc := (player.stats.get_stat("PHYSICAL_DAMAGE", 1.0) - 1.0) * 100.0
 	var bleed := player.stats.get_stat("BLEED_CHANCE", 0.0)
 	_stats_label.text = "[b]캐릭터 스탯 (Lv.%d)[/b]\nSTR %d | DEX %d | INT %d\n최대 생명력: %d | 방어도: %d\n물리 피해 증가: +%d%% | 출혈 확률: %d%%\n이동 속도: %d" % [
