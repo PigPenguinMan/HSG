@@ -14,3 +14,4 @@
 |---|---|
 | `claude_wolf.png` | Claude (`claude_wolf.py`로 생성) |
 | `antigravity_wolf.png` | Antigravity |
+| `antigravity_wolf_face_v2.png` | Antigravity 원본 + Claude 얼굴 수정 (`fix_antigravity_face.py`): 눈 사이 베이지 얼룩 제거, 얼굴·볼터치 좌우 대칭, 작은 코, 이마 털 V자 |
