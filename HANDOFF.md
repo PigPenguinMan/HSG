@@ -465,3 +465,14 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
   - 저장 후 새로고침해도 세이브가 남는지 (`save_manager.gd`가 임시 파일 → 이름 바꾸기 방식이라 브라우저 저장소 반영 확인 필요)
 - **P2** 갈무리11은 12px의 배수에서 가장 선명합니다. 지금 UI 글자 크기는 11/12/13/16이 섞여 있어 일부 글자가 고르지 않을 수 있습니다. 12/24로 정리할지는 화면 보고 결정.
 - **P2** 전체 화면에서는 ESC를 브라우저가 먼저 가져가 창 모드로 빠집니다. 메뉴 키 유지 여부 결정 필요.
+
+---
+
+## 20. Antigravity 작업 보고 (2026-11-18, main @ ee1da80) — 웹 빌드 호환성 보강 (세이브 폴백 & 갈무리11 12px 폰트 정렬)
+
+### 반영 완료
+- **`src/world/save_manager.gd`**: 브라우저 IndexedDB 가상 파일시스템(`user://`)에서 기존 파일 위로 `DirAccess.rename_absolute()`가 실패하는 경우에도 세이브가 누락되지 않도록 직접 쓰기(`FileAccess.WRITE`) 폴백 추가
+- **갈무리11 픽셀 폰트 선명도 보정 (§19 P2)**:
+  - `src/ui/dark_fantasy_theme.gd`: `default_font_size = 12`, `ThemeDB.fallback_font_size = 12` 지정
+  - `src/world/arena.gd`, `src/world/floating_text.gd`, `src/world/loot_drop.gd`: `11px`/`13px`로 흩어져 있던 폰트 크기를 `12px`로 통일
+- **테스트 실행 여부**: **테스트 미실행** (원격 VM에 `godot` 바이너리와 Web Export Template이 설치되어 있지 않아 실제 `.html`/`.wasm` 빌드는 로컬 Godot 에디터에서 수행해야 합니다)

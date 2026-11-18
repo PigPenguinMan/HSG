@@ -855,7 +855,7 @@ func _build_bottom_hud(ui_theme: Theme) -> void:
 		var lbl := Label.new()
 		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		lbl.add_theme_font_size_override("font_size", 11)
+		lbl.add_theme_font_size_override("font_size", 12)
 		slot_panel.add_child(lbl)
 		_skill_bar_labels[slot_key] = lbl
 
@@ -867,7 +867,7 @@ func _build_bottom_hud(ui_theme: Theme) -> void:
 	_life_flask_badge = Label.new()
 	_life_flask_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_life_flask_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_life_flask_badge.add_theme_font_size_override("font_size", 11)
+	_life_flask_badge.add_theme_font_size_override("font_size", 12)
 	_life_flask_badge.add_theme_color_override("font_color", Color(1.0, 0.65, 0.65))
 	_life_flask_badge.text = "[1] 생명력\n3/5"
 	life_flask_panel.add_child(_life_flask_badge)
@@ -880,7 +880,7 @@ func _build_bottom_hud(ui_theme: Theme) -> void:
 	_mana_flask_badge = Label.new()
 	_mana_flask_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_mana_flask_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_mana_flask_badge.add_theme_font_size_override("font_size", 11)
+	_mana_flask_badge.add_theme_font_size_override("font_size", 12)
 	_mana_flask_badge.add_theme_color_override("font_color", Color(0.65, 0.82, 1.0))
 	_mana_flask_badge.text = "[2] 마나\n3/5"
 	mana_flask_panel.add_child(_mana_flask_badge)

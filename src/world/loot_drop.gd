@@ -40,7 +40,7 @@ func _ready() -> void:
 	label.text = _format_name()
 	label.position = Vector2(-48, -28)
 	label.add_theme_color_override("font_color", color)
-	label.add_theme_font_size_override("font_size", 11)
+	label.add_theme_font_size_override("font_size", 12)
 	add_child(label)
 
 	body_entered.connect(_on_body_entered)

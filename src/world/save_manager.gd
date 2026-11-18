@@ -18,7 +18,17 @@ static func save_state(state: Dictionary, path: String = SAVE_PATH) -> bool:
 	var abs_tmp: String = ProjectSettings.globalize_path(tmp_path)
 	var abs_dst: String = ProjectSettings.globalize_path(path)
 	var err: int = DirAccess.rename_absolute(abs_tmp, abs_dst)
-	return err == OK
+	if err == OK:
+		return true
+
+	# Fallback for Web / virtual filesystems where rename_absolute across Existing files may fail
+	var f_dst := FileAccess.open(path, FileAccess.WRITE)
+	if f_dst == null:
+		return false
+	f_dst.store_string(encoded)
+	f_dst.flush()
+	f_dst.close()
+	return true
 
 
 static func load_state(path: String = SAVE_PATH) -> Dictionary:

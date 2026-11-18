@@ -6,7 +6,7 @@ var _life: float = 0.55
 var _max_life: float = 0.55
 
 
-static func spawn(parent: Node, pos: Vector2, msg: String, color: Color, font_size: int = 13) -> void:
+static func spawn(parent: Node, pos: Vector2, msg: String, color: Color, font_size: int = 12) -> void:
 	if parent == null:
 		return
 	var ft := FloatingText.new()

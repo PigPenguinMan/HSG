@@ -23,8 +23,10 @@ static func build() -> Theme:
 	var font: Font = pixel_font()
 	if font != null:
 		t.default_font = font
+		t.default_font_size = 12
 		# World-space labels (floating damage text, loot names) have no theme; give them the same font.
 		ThemeDB.fallback_font = font
+		ThemeDB.fallback_font_size = 12
 
 	var panel := StyleBoxFlat.new()
 	panel.bg_color = Color(0.07, 0.06, 0.08, 0.94)
