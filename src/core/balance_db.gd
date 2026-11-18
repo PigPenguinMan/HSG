@@ -10,10 +10,10 @@ static var _data: Dictionary = {}
 static func ensure_loaded(path: String = DEFAULT_PATH) -> void:
 	if _loaded:
 		return
-	reload(path)
+	load_from(path)
 
 
-static func reload(path: String = DEFAULT_PATH) -> bool:
+static func load_from(path: String = DEFAULT_PATH) -> bool:
 	_loaded = true
 	if not FileAccess.file_exists(path):
 		_data = {}
