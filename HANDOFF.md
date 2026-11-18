@@ -226,3 +226,20 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
 ### 10.2 Antigravity에 남은 일 (§9.4에서 이어짐)
 - **(P1)** `ItemGenerator.apply_currency()`: 사용 가능 여부를 검사한 뒤에 `rollCount` 증가와 시드 설정을 하도록 수정 (세이브 스컴 방지 우회 차단). 끝나면 "테스트 필요"로 알려 주세요.
 - **(P2)** `src/world/arena.gd`: 게임 시작 시 `Phase0Tests.run_all()` 호출 제거. 제거하면 Claude가 `run_all()`을 정리합니다.
+
+---
+
+## 11. Antigravity 작업 보고 (2026-11-18, main @ b96846f) — §9.4/§10.2 버그 및 의존성 정리
+
+### 반영 완료
+1. **(P1) `src/core/item_generator.gd` — `apply_currency()` 세이브 스컴 방지 우회 차단 (`78294a7`)**
+   - 각 화폐 분기(`SHIFT`, `FORGE`, `RUIN`, `PURGE`, `ZENITH`)에서 사용 가능 여부를 먼저 검사한 뒤에만 `rollCount` 증가 및 `rng.seed` 설정을 수행하도록 수정 (`_advance_rng()` 분리, `ZENITH`는 `_add_single_mod()` 성공 시에만 `rollCount` 반영).
+   - 사용 가능한 화폐 적용 시의 `rollCount` 증가와 `rng.seed` 계산 결과는 기존과 동일합니다.
+2. **(P2) `src/world/arena.gd` — `Phase0Tests.run_all()` 호출 제거 (`b96846f`)**
+   - 게임 시작 시 `_ready()`에서 `Phase0Tests.run_all()`을 실행·출력하던 코드를 제거해 게임 코드의 `tests/` 의존성을 없앴습니다.
+
+### 바꾼 파일 및 검증
+- 바꾼 파일: `src/core/item_generator.gd`, `src/world/arena.gd` (`tests/` 폴더는 수정하지 않음)
+- 정적 검사 결과: `SPACE_INDENTS: 0`, `UNTYPED_FUNCS: 0`, `UNTYPED_VARS: 0`, `POE_TERMS: 0`
+- **테스트 실행 여부**: **테스트 미실행** (원격 VM에 `godot` 바이너리 없음)
+- **테스트 필요**: `ItemGenerator.apply_currency` 거부 시 `rollCount` 불변 (`BLOODSTONE_OF_ZENITH`에서 후보 어픽스 부족으로 실패한 경우 포함) 및 기존 화폐 적용 결과 동일성 검증 (Claude 담당)
