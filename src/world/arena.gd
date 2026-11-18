@@ -24,10 +24,13 @@ var _near_npc: Dictionary = {}
 var _near_waypoint: bool = false
 
 const BalanceDBScript := preload("res://src/core/balance_db.gd")
+const SaveManagerScript := preload("res://src/world/save_manager.gd")
 const InventoryPanelScript := preload("res://src/ui/inventory_panel.gd")
 const PassiveTreePanelScript := preload("res://src/ui/passive_tree_panel.gd")
 const SkillPanelScript := preload("res://src/ui/skill_panel.gd")
 const DarkFantasyThemeScript := preload("res://src/ui/dark_fantasy_theme.gd")
+
+var _save_ready: bool = false
 
 var _inv_panel: InventoryPanelScript
 var _tree_panel: PassiveTreePanelScript
@@ -65,7 +68,62 @@ func _ready() -> void:
 
 	_build_ui()
 
-	_enter_zone("town", Vector2(640, 620))
+	var loaded: Dictionary = SaveManagerScript.load_state()
+	if bool(loaded.get("corrupted", false)):
+		_push_log("세이브 파일 손상, 새 게임 시작")
+		_enter_zone("town", Vector2(640, 620))
+	elif bool(loaded.get("exists", false)):
+		_apply_save_state(loaded["state"])
+		_enter_zone(_respawn_zone, _respawn_pos)
+	else:
+		_enter_zone("town", Vector2(640, 620))
+	_save_ready = true
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST and _save_ready:
+		_save_game()
+
+
+func _save_game() -> void:
+	if _player == null:
+		return
+	var wps: Array = []
+	for zid in _discovered_waypoints.keys():
+		if bool(_discovered_waypoints[zid]):
+			wps.append(str(zid))
+	var state: Dictionary = {
+		"save_version": 1,
+		"player": _player.to_save_dict(),
+		"world": {
+			"respawn_zone": _respawn_zone,
+			"respawn_pos": _respawn_pos,
+			"discovered_waypoints": wps,
+			"boss_defeated": _boss_defeated,
+			"hor_reward_claimed": _hor_reward_claimed,
+			"loot_seed": _loot_seed,
+			"kills": _kills,
+		},
+	}
+	SaveManagerScript.save_state(state)
+
+
+func _apply_save_state(state: Dictionary) -> void:
+	var w: Dictionary = state.get("world", {})
+	_respawn_zone = str(w.get("respawn_zone", "town"))
+	var rp: Variant = w.get("respawn_pos", Vector2(640, 620))
+	_respawn_pos = rp if rp is Vector2 else Vector2(640, 620)
+	_discovered_waypoints.clear()
+	for zid in w.get("discovered_waypoints", []):
+		_discovered_waypoints[str(zid)] = true
+	if _discovered_waypoints.is_empty():
+		_discovered_waypoints["town"] = true
+	_boss_defeated = bool(w.get("boss_defeated", false))
+	_hor_reward_claimed = bool(w.get("hor_reward_claimed", false))
+	_loot_seed = int(w.get("loot_seed", 1000))
+	_kills = int(w.get("kills", 0))
+	_player.apply_save_dict(state.get("player", {}))
+	_refresh_skill_bar()
 
 
 func _load_zones() -> void:
@@ -317,6 +375,8 @@ func _enter_zone(zone_id: String, spawn_pos: Vector2) -> void:
 
 	_push_log("[%s] 입장" % str(z.get("name", zone_id)))
 	_player._emit_stats()
+	if _save_ready:
+		_save_game()
 
 
 func _build_ground(sz: Vector2, base_col: Color) -> void:
@@ -418,6 +478,7 @@ func _build_checkpoint(pos: Vector2) -> void:
 			_respawn_pos = pos
 			vis.modulate = Color(1.25, 1.1, 0.75)
 			_push_log("체크포인트 저장됨")
+			_save_game()
 	)
 	_zone_root.add_child(area)
 
@@ -595,6 +656,7 @@ func _open_npc_dialog(npc: Dictionary) -> void:
 					_item_gen.apply_currency(reward, StatTypes.CurrencyType.BLOODSTONE_OF_FORGE)
 					_player.add_item_to_inventory(reward)
 					_player._emit_stats()
+					_save_game()
 					_dialog_body.text = "패시브 포인트 +2와 희귀 무기를 받았다! (Act 1 수직 슬라이스 완료)"
 				)
 			else:
@@ -668,6 +730,7 @@ func _on_boss_died(enemy: Enemy, pos: Vector2, _is_rare: bool) -> void:
 	_player.add_currency(StatTypes.CurrencyType.BLOODSTONE_OF_FORGE, int(drops_bal.get("boss_forge_drop", 2)))
 	_drop_item(pos, true)
 	_push_log("철갑 브룬 처치! 야영지의 호르에게 돌아가세요.")
+	_save_game()
 
 
 func _on_enemy_died(enemy: Enemy, pos: Vector2, is_rare: bool) -> void:

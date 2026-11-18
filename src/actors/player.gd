@@ -624,3 +624,78 @@ func _build_wolf_pixel_sprite() -> void:
 	spr.scale = Vector2(1.0, 1.0)
 	add_child(spr)
 	_body_node = spr
+
+
+func to_save_dict() -> Dictionary:
+	var alloc: Array = []
+	for nid in passive_tree.allocated.keys():
+		alloc.append(str(nid))
+	return {
+		"level": level,
+		"xp": xp,
+		"xp_to_next": xp_to_next,
+		"passive_points": passive_points,
+		"allocated_nodes": alloc,
+		"equipment": equipment.duplicate(true),
+		"inventory": inventory.duplicate(true),
+		"currency_pouch": currency_pouch.duplicate(),
+		"skill_slots": skill_slots.duplicate(true),
+		"life_flask_charges": life_flask_charges,
+		"mana_flask_charges": mana_flask_charges,
+	}
+
+
+func apply_save_dict(d: Dictionary) -> void:
+	level = int(d.get("level", 1))
+	xp = int(d.get("xp", 0))
+	xp_to_next = int(d.get("xp_to_next", int(_bal.get("xp_to_next_base", 100))))
+	passive_points = int(d.get("passive_points", 2))
+	life_flask_charges = int(d.get("life_flask_charges", 3))
+	mana_flask_charges = int(d.get("mana_flask_charges", 3))
+
+	passive_tree.allocated.clear()
+	if passive_tree.start_node_id != "":
+		passive_tree.allocated[passive_tree.start_node_id] = true
+	var saved_nodes: Variant = d.get("allocated_nodes", [])
+	if saved_nodes is Array:
+		for raw_nid in saved_nodes:
+			var nid: String = str(raw_nid)
+			if nid == "" or nid == passive_tree.start_node_id:
+				continue
+			if passive_tree.nodes.has(nid):
+				passive_tree.allocated[nid] = true
+			else:
+				passive_points += 1
+
+	var eq_in: Variant = d.get("equipment", {})
+	if eq_in is Dictionary:
+		var eq_d: Dictionary = eq_in
+		for slot_key in equipment.keys():
+			var item_v: Variant = eq_d.get(slot_key, null)
+			equipment[slot_key] = item_v.duplicate(true) if item_v is Dictionary else null
+
+	inventory.clear()
+	var inv_in: Variant = d.get("inventory", [])
+	if inv_in is Array:
+		for item_v in inv_in:
+			if item_v is Dictionary:
+				inventory.append((item_v as Dictionary).duplicate(true))
+
+	var pouch_in: Variant = d.get("currency_pouch", {})
+	if pouch_in is Dictionary:
+		currency_pouch.clear()
+		var p_d: Dictionary = pouch_in
+		for k in p_d.keys():
+			currency_pouch[int(k)] = int(p_d[k])
+
+	var slots_in: Variant = d.get("skill_slots", {})
+	if slots_in is Dictionary:
+		var s_d: Dictionary = slots_in
+		for sk in skill_slots.keys():
+			if s_d.has(sk) and s_d[sk] is Dictionary:
+				skill_slots[sk] = (s_d[sk] as Dictionary).duplicate(true)
+
+	recalculate_stats()
+	hp = max_hp
+	mana = max_mana
+	_emit_stats()
