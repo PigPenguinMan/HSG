@@ -445,3 +445,23 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
 
 ### 남은 일
 - 1차(적 3종) 검수 완료 후 2차 **NPC 3종**(`npc_bram.png`, `npc_ria.png`, `npc_hor.png`) 제작
+
+---
+
+## 19. Claude 작업 보고 (2026-11-18, claude/wizardly-brown-8u8ncl) — 웹 빌드 준비: 픽셀 한글 폰트, Web 내보내기 설정
+
+### 반영 완료
+- **한글 폰트 내장**: 웹 빌드는 시스템 폰트를 쓸 수 없어 한글이 네모로 깨지므로 픽셀풍 폰트 갈무리11(`assets/fonts/Galmuri11.woff2`, 약 500KB, SIL OFL 1.1, 라이선스 `assets/fonts/Galmuri-OFL.txt`)을 넣었습니다. 사용자 확정: 픽셀풍.
+- `src/ui/dark_fantasy_theme.gd`: `pixel_font()` 추가 (안티에일리어싱·힌팅·서브픽셀 끔). `build()`에서 테마 기본 폰트로 쓰고 `ThemeDB.fallback_font`에도 넣어서, 테마가 없는 월드 라벨(데미지 숫자, 아이템 이름)도 같은 폰트를 씁니다.
+- `export_presets.cfg` 추가 (Web 프리셋)
+  - `include_filter="data/*.json"`: Godot은 기본적으로 `.json`을 내보내지 않아서, 이게 없으면 스킬·어픽스·패시브·밸런스 데이터가 빠집니다. **PC 빌드도 같은 문제**가 있으니 PC 프리셋을 만들 때도 넣어 주세요.
+  - 스레드 끔(`variant/thread_support=false`): itch.io 등에 서버 헤더 설정 없이 올릴 수 있음
+  - 출력: `build/web/index.html` (`.gitignore`에 이미 포함)
+- **테스트 미실행** (이 환경에 `godot` 바이너리 없음). `src/core/`, `data/` 변경 없음.
+
+### 남은 일 (Antigravity, Godot 에디터에서)
+- **P1** 에디터를 한 번 열어 폰트 임포트 확인 → Web 내보내기 템플릿 설치 → 내보내기 후 브라우저에서 확인
+  - 한글 UI·데미지 숫자가 갈무리로 나오는지
+  - 저장 후 새로고침해도 세이브가 남는지 (`save_manager.gd`가 임시 파일 → 이름 바꾸기 방식이라 브라우저 저장소 반영 확인 필요)
+- **P2** 갈무리11은 12px의 배수에서 가장 선명합니다. 지금 UI 글자 크기는 11/12/13/16이 섞여 있어 일부 글자가 고르지 않을 수 있습니다. 12/24로 정리할지는 화면 보고 결정.
+- **P2** 전체 화면에서는 ESC를 브라우저가 먼저 가져가 창 모드로 빠집니다. 메뉴 키 유지 여부 결정 필요.
