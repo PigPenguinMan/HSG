@@ -262,3 +262,80 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
 ### 12.3 결과
 - **테스트 실행: 17/17 통과** (검사 139,019건), 메인 씬 600프레임 헤드리스 실행 에러 0건
 - §9.4에서 남아 있던 항목은 모두 처리됐습니다.
+
+---
+
+## 13. Claude 피드백 (2026-11-18, main @ cf5498d) — v0.1 마무리 스펙
+
+### 13.1 사용자 확정 사항
+- **v0.1 마무리 범위**: ① 디스크 저장/불러오기, ② 마나 물약. 둘 다 끝나면 사용자가 30분 플레이테스트를 합니다.
+- **감전(Shock)은 v0.2로 이연**: 게임에 번개 피해(스킬·어픽스·스탯)가 아예 없어서, v0.2에서 번개 스킬과 함께 넣습니다. `docs/06` 범위 표에 반영했습니다.
+
+### 13.2 (P0) 저장/불러오기 스펙 — Antigravity 구현
+**⚠️ JSON을 그대로 쓰면 안 되는 이유 (Claude가 Godot 4.7에서 확인)**
+`JSON.stringify` → `JSON.parse_string`을 한 번 거치면 다음처럼 바뀝니다.
+| 원래 값 | 불러온 값 | 결과 |
+|---|---|---|
+| `"seed": 7777` (int) | `7777.0` (float), `str()` → `"7777.0"` | **크래프팅 시드가 바뀜.** 저장 전후로 같은 화폐 결과가 달라져서 세이브 스컴이 다시 가능해짐 |
+| `currency_pouch` 키 `0`, `4` (int) | `"0"`, `"4"` (String) | `has(int)`가 false가 되어 **화폐가 사라짐** |
+| `Vector2(1, 2)` | `"(1.0, 2.0)"` (String) | 위치 복원 실패 |
+
+그래서 **타입을 명시적으로 변환하는 코덱**을 `src/core/`에 둡니다(순수 계산 영역이라 Claude가 테스트합니다).
+
+**파일 구성**
+- `src/core/save_codec.gd` — `class_name SaveCodec`, `extends RefCounted`, 노드 의존 없음, 전부 `static`
+  - `const SAVE_VERSION: int = 1`
+  - `static func encode(state: Dictionary) -> String`: 아래 스키마를 JSON 문자열로 만든다. `Vector2`는 `[x, y]` 배열로, pouch 키는 문자열로 바꾼다.
+  - `static func decode(text: String) -> Dictionary`: `{"ok": bool, "error": String, "state": Dictionary}`를 돌려준다.
+    - 파싱 실패, `save_version` 없음 또는 다른 버전, 필수 키 누락 → `ok: false` (크래시 금지)
+    - **정수 복원**: 아이템의 `rarity`, `itemLevel`, `seed`, `rollCount`, 각 mod의 `tier`, `value`, 그리고 `level`, `xp`, `xp_to_next`, `passive_points`, 물약 충전량, `loot_seed`, `kills`, pouch 값은 모두 `int()`로 되돌린다.
+    - **pouch 키**는 `int` 키로 되돌린다. **위치**는 `Vector2`로 되돌린다.
+    - 원칙: `encode → decode`를 거친 state가 원래 state와 **`==`로 같아야 한다.**
+- `src/world/save_manager.gd` (또는 `arena.gd` 안) — 파일 입출력만 담당
+  - 경로: `user://save_slot_1.json`
+  - **원자적 쓰기**: `save_slot_1.json.tmp`에 쓴 뒤 `DirAccess.rename_absolute()`로 교체 (저장 도중 꺼져도 기존 세이브가 깨지지 않게)
+  - `decode`가 `ok: false`면 기존 파일을 `save_slot_1.json.bak`으로 옮기고 새 게임으로 시작 + 로그에 "세이브 파일 손상, 새 게임 시작" 표시
+
+**state 스키마 (save_version 1)**
+```
+{
+  "save_version": 1,
+  "player": {
+    "level", "xp", "xp_to_next", "passive_points",
+    "allocated_nodes": [node_id, ...],          # START 포함
+    "equipment": {"WEAPON": item|null, ...},    # 6칸 그대로
+    "inventory": [item, ...],
+    "currency_pouch": {CurrencyType(int): count},
+    "skill_slots": {"LMB": {"skill_id", "runes": [...]}, ...},
+    "life_flask_charges", "mana_flask_charges"
+  },
+  "world": {
+    "respawn_zone": String, "respawn_pos": Vector2,
+    "discovered_waypoints": [zone_id, ...],
+    "boss_defeated": bool, "hor_reward_claimed": bool,
+    "loot_seed": int, "kills": int
+  }
+}
+```
+- `Player`에 `to_save_dict() -> Dictionary` / `apply_save_dict(d: Dictionary) -> void`를 추가. `apply_save_dict` 마지막에 `recalculate_stats()`를 부르고 HP/마나는 최대치로 채운다(부활 규칙 docs/05와 같음).
+- 패시브 트리 복원은 `PassiveTreeGraph`에 `allocated`를 직접 넣지 말고, 저장된 노드가 실제로 존재하는지 확인한 뒤 넣는다(데이터가 바뀌어 없어진 노드는 버리고 그만큼 포인트 환급).
+
+**저장 시점**: 체크포인트 활성화, 구역 이동 직후, 보스 처치, NPC 보상 수령, 창 닫기(`NOTIFICATION_WM_CLOSE_REQUEST`)
+**불러오기**: 게임 시작 시 세이브가 있으면 불러와서 `respawn_zone` / `respawn_pos`에서 시작, 없으면 지금처럼 새 게임
+
+### 13.3 (P1) 마나 물약 스펙 — Antigravity 구현
+- 키 `2` (`physical_keycode`), 생명력 물약(키 `1`)과 **충전량을 따로** 관리
+- 기존 `flask_charges` → `life_flask_charges`로 이름 변경, `mana_flask_charges` 추가. HUD 물약 칸도 2개로
+- `data/balance.json` `player`에 추가: `"mana_flask_max_charges": 5`, `"mana_flask_restore": 40.0` (튜닝용 초기값)
+- 처치 시 두 물약 모두 충전 (지금 규칙 그대로: 일반 +1, 희귀 +2)
+- **`피의 갈증`(BLOODTHIRST) 상태**에서는 최대 마나가 0이므로 마나 물약을 쓸 수 없고 **충전량도 소모하지 않음**. 마나가 가득 찼을 때도 소모하지 않음 (생명력 물약과 같은 규칙)
+- 부활과 리아의 물약 충전은 두 물약 모두 최대치로. `arena.gd:567`의 `flask_charges = 5` 하드코딩도 `balance.json` 값을 쓰도록
+
+### 13.4 Claude가 할 일 (구현 끝나면)
+- `tests/save_tests.gd`: `encode→decode` 왕복 동일성(아이템 시드 포함), **불러온 아이템에 화폐를 썼을 때 저장 전과 같은 결과**, pouch 키 타입, 손상/구버전/키 누락 파일 거부, 없어진 패시브 노드 처리
+- `balance_tests.gd`의 `EXPECTED`에 마나 물약 값 추가
+- 저장 → 재시작 → 불러오기를 헤드리스로 실제 실행해서 확인
+
+### 13.5 작업 보고 때 적어 줄 것
+- "테스트 필요: SaveCodec.encode/decode, Player.to_save_dict/apply_save_dict, 마나 물약"
+- 새로 생긴 `.uid` 파일도 함께 커밋
