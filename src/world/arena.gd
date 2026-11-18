@@ -45,7 +45,8 @@ var _hp_orb_label: Label
 var _mana_orb_fill: ColorRect
 var _mana_orb_label: Label
 var _xp_bar_fill: ColorRect
-var _flask_badge: Label
+var _life_flask_badge: Label
+var _mana_flask_badge: Label
 var _skill_bar_labels: Dictionary = {}
 
 
@@ -564,9 +565,13 @@ func _open_npc_dialog(npc: Dictionary) -> void:
 		"ria":
 			_dialog_body.text = "피에 굶주린 땅에서는 물약과 혈석이 목숨줄이지."
 			_add_dialog_btn("물약 전부 충전 (무료)", func() -> void:
-				_player.flask_charges = 5
+				var p_bal: Dictionary = BalanceDBScript.get_section("player")
+				var life_max: int = int(p_bal.get("flask_max_charges", 5))
+				var mana_max: int = int(p_bal.get("mana_flask_max_charges", 5))
+				_player.life_flask_charges = life_max
+				_player.mana_flask_charges = mana_max
 				_player._emit_stats()
-				_dialog_body.text = "물약을 5/5로 채웠어요."
+				_dialog_body.text = "생명력(%d/%d)과 마나(%d/%d) 물약을 모두 채웠어요." % [life_max, life_max, mana_max, mana_max]
 			)
 			_add_dialog_btn("변이의 혈석 2개 → 단조의 혈석 1개 교환", func() -> void:
 				var shift_cnt := int(_player.currency_pouch.get(StatTypes.CurrencyType.BLOODSTONE_OF_SHIFT, 0))
@@ -757,14 +762,14 @@ func _build_bottom_hud(ui_theme: Theme) -> void:
 	var center_box := VBoxContainer.new()
 	center_box.anchor_left = 0.5
 	center_box.anchor_right = 0.5
-	center_box.offset_left = -260
-	center_box.offset_right = 260
+	center_box.offset_left = -310
+	center_box.offset_right = 310
 	center_box.offset_top = 18
 	center_box.add_theme_constant_override("separation", 6)
 	bottom.add_child(center_box)
 
 	var xp_bg := ColorRect.new()
-	xp_bg.custom_minimum_size = Vector2(520, 6)
+	xp_bg.custom_minimum_size = Vector2(620, 6)
 	xp_bg.color = Color(0.12, 0.10, 0.14, 0.9)
 	center_box.add_child(xp_bg)
 
@@ -791,17 +796,31 @@ func _build_bottom_hud(ui_theme: Theme) -> void:
 		slot_panel.add_child(lbl)
 		_skill_bar_labels[slot_key] = lbl
 
-	var flask_panel := PanelContainer.new()
-	flask_panel.custom_minimum_size = Vector2(82, 46)
-	flask_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bar.add_child(flask_panel)
+	var life_flask_panel := PanelContainer.new()
+	life_flask_panel.custom_minimum_size = Vector2(78, 46)
+	life_flask_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_child(life_flask_panel)
 
-	_flask_badge = Label.new()
-	_flask_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_flask_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_flask_badge.add_theme_font_size_override("font_size", 11)
-	_flask_badge.text = "[1] 물약\n3/5"
-	flask_panel.add_child(_flask_badge)
+	_life_flask_badge = Label.new()
+	_life_flask_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_life_flask_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_life_flask_badge.add_theme_font_size_override("font_size", 11)
+	_life_flask_badge.add_theme_color_override("font_color", Color(1.0, 0.65, 0.65))
+	_life_flask_badge.text = "[1] 생명력\n3/5"
+	life_flask_panel.add_child(_life_flask_badge)
+
+	var mana_flask_panel := PanelContainer.new()
+	mana_flask_panel.custom_minimum_size = Vector2(78, 46)
+	mana_flask_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.add_child(mana_flask_panel)
+
+	_mana_flask_badge = Label.new()
+	_mana_flask_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_mana_flask_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_mana_flask_badge.add_theme_font_size_override("font_size", 11)
+	_mana_flask_badge.add_theme_color_override("font_color", Color(0.65, 0.82, 1.0))
+	_mana_flask_badge.text = "[2] 마나\n3/5"
+	mana_flask_panel.add_child(_mana_flask_badge)
 
 	_refresh_skill_bar()
 
@@ -847,7 +866,7 @@ func _refresh_skill_bar() -> void:
 		lbl.text = "[%s]\n%s" % [key_names[sk], sname]
 
 
-func _on_player_stats_changed(hp: float, max_hp: float, mana: float, max_mana: float, flask: int, lv: int, cur_xp: int, next_xp: int) -> void:
+func _on_player_stats_changed(hp: float, max_hp: float, mana: float, max_mana: float, life_flask: int, mana_flask: int, lv: int, cur_xp: int, next_xp: int) -> void:
 	var zname := str(_zones.get(_current_zone_id, {}).get("name", _current_zone_id))
 	var pts_text := "  |  [패시브 포인트: %d]" % _player.passive_points if _player.passive_points > 0 else ""
 	hud_label.text = "[%s] Lv.%d (XP %d/%d)%s  |  처치: %d\n[WASD] 이동  [E] 대화/이동진  [I] 인벤  [P] 패시브  [K] 스킬/룬" % [
@@ -874,6 +893,11 @@ func _on_player_stats_changed(hp: float, max_hp: float, mana: float, max_mana: f
 			_mana_orb_label.text = "%d\n/%d" % [int(mana), int(max_mana)]
 
 	if _xp_bar_fill != null:
-		_xp_bar_fill.size.x = 520.0 * clampf(float(cur_xp) / float(maxi(1, next_xp)), 0.0, 1.0)
-	if _flask_badge != null:
-		_flask_badge.text = "[1] 물약\n%d/5" % flask
+		_xp_bar_fill.size.x = 620.0 * clampf(float(cur_xp) / float(maxi(1, next_xp)), 0.0, 1.0)
+	var p_bal: Dictionary = BalanceDBScript.get_section("player")
+	var life_max: int = int(p_bal.get("flask_max_charges", 5))
+	var mana_max: int = int(p_bal.get("mana_flask_max_charges", 5))
+	if _life_flask_badge != null:
+		_life_flask_badge.text = "[1] 생명력\n%d/%d" % [life_flask, life_max]
+	if _mana_flask_badge != null:
+		_mana_flask_badge.text = "[2] 마나\n%d/%d" % [mana_flask, mana_max]

@@ -1,7 +1,7 @@
 class_name Player
 extends CharacterBody2D
 
-signal stats_changed(hp: float, max_hp: float, mana: float, max_mana: float, flask_charges: int, level: int, xp: int, xp_next: int)
+signal stats_changed(hp: float, max_hp: float, mana: float, max_mana: float, life_flask_charges: int, mana_flask_charges: int, level: int, xp: int, xp_next: int)
 signal rpg_state_changed()
 signal player_died()
 
@@ -32,7 +32,8 @@ var max_mana: float = 60.0
 var mana: float = 60.0
 var armour: float = 80.0
 var move_speed: float = 210.0
-var flask_charges: int = 3
+var life_flask_charges: int = 3
+var mana_flask_charges: int = 3
 var ui_blocking_input: bool = false
 var in_town: bool = false
 
@@ -66,6 +67,8 @@ var _hitstop_active: bool = false
 var _hurt_flash_timer: float = 0.0
 var _dash_hit_ids: Dictionary = {}
 var _anim_timer: float = 0.0
+var _life_flask_held: bool = false
+var _mana_flask_held: bool = false
 
 var skills_db: Dictionary = {}
 var runes_db: Dictionary = {}
@@ -303,9 +306,17 @@ func _physics_process(delta: float) -> void:
 		elif Input.is_physical_key_pressed(KEY_Q):
 			_trigger_slot("Q", mouse_dir, cd_scale)
 
-	if Input.is_physical_key_pressed(KEY_1) and flask_charges > 0 and hp < max_hp:
-		flask_charges -= 1
+	var k1_down: bool = Input.is_physical_key_pressed(KEY_1)
+	if k1_down and not _life_flask_held and life_flask_charges > 0 and hp < max_hp:
+		life_flask_charges -= 1
 		hp = minf(max_hp, hp + float(_bal.get("flask_heal", 45.0)))
+	_life_flask_held = k1_down
+
+	var k2_down: bool = Input.is_physical_key_pressed(KEY_2)
+	if k2_down and not _mana_flask_held and not stats.has_flag("BLOODTHIRST") and max_mana > 0.0 and mana < max_mana and mana_flask_charges > 0:
+		mana_flask_charges -= 1
+		mana = minf(max_mana, mana + float(_bal.get("mana_flask_restore", 40.0)))
+	_mana_flask_held = k2_down
 
 	_emit_stats()
 
@@ -532,8 +543,11 @@ func _shadow_dash_tick() -> void:
 
 
 func on_enemy_killed(is_rare: bool, xp_override: int = -1) -> void:
-	var max_flask: int = int(_bal.get("flask_max_charges", 5))
-	flask_charges = mini(max_flask, flask_charges + (2 if is_rare else 1))
+	var max_life_flask: int = int(_bal.get("flask_max_charges", 5))
+	var max_mana_flask: int = int(_bal.get("mana_flask_max_charges", 5))
+	var gain: int = 2 if is_rare else 1
+	life_flask_charges = mini(max_life_flask, life_flask_charges + gain)
+	mana_flask_charges = mini(max_mana_flask, mana_flask_charges + gain)
 	var gained_xp := xp_override if xp_override >= 0 else (90 if is_rare else 25)
 	xp += gained_xp
 	var max_lv: int = int(_bal.get("max_level", 20))
@@ -593,13 +607,14 @@ func take_damage(raw_phys: float) -> void:
 	if hp <= 0.0:
 		hp = max_hp
 		mana = max_mana
-		flask_charges = int(_bal.get("flask_max_charges", 5))
+		life_flask_charges = int(_bal.get("flask_max_charges", 5))
+		mana_flask_charges = int(_bal.get("mana_flask_max_charges", 5))
 		player_died.emit()
 	_emit_stats()
 
 
 func _emit_stats() -> void:
-	stats_changed.emit(hp, max_hp, mana, max_mana, flask_charges, level, xp, xp_to_next)
+	stats_changed.emit(hp, max_hp, mana, max_mana, life_flask_charges, mana_flask_charges, level, xp, xp_to_next)
 
 
 func _build_wolf_pixel_sprite() -> void:
