@@ -64,10 +64,6 @@ func _ready() -> void:
 
 	_build_ui()
 
-	var test_results := Phase0Tests.run_all()
-	for line in test_results:
-		print(line)
-
 	_enter_zone("town", Vector2(640, 620))
 
 
