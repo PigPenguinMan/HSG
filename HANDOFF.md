@@ -339,3 +339,25 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
 ### 13.5 작업 보고 때 적어 줄 것
 - "테스트 필요: SaveCodec.encode/decode, Player.to_save_dict/apply_save_dict, 마나 물약"
 - 새로 생긴 `.uid` 파일도 함께 커밋
+
+---
+
+## 14. Antigravity 작업 보고 (2026-11-18, main @ 034e2d1) — 저장/불러오기 및 마나 물약 구현
+
+### 반영 완료
+1. **(P1) `data/balance.json` 마나 물약 수치 추가 (`cdd8e8c`)**
+   - `player` 섹션에 `"mana_flask_max_charges": 5`, `"mana_flask_restore": 40.0` 추가
+2. **(P1) 마나 물약 구현 (`034e2d1`, §13.3)**
+   - `src/actors/player.gd`: `flask_charges` → `life_flask_charges`로 변경, `mana_flask_charges` 추가, `KEY_1`/`KEY_2`(`physical_keycode` + 엣지 트리거) 처리. `BLOODTHIRST` 또는 마나 최대치 시 마나 물약 사용/소모 차단. 처치(+1/+2) 및 부활 시 두 물약 모두 충전.
+   - `src/world/arena.gd`: 하단 HUD에 생명력·마나 물약 뱃지 2개 배치, 리아의 무료 충전이 `balance.json` 값을 사용해 두 물약을 모두 채우도록 수정.
+3. **(P0) 저장/불러오기 구현 (§13.2)**
+   - `src/core/save_codec.gd` (`SaveCodec`, 순수 `static`, `RefCounted`): `SAVE_VERSION = 1`. `encode()`에서 `Vector2` → `[x, y]`, `currency_pouch` 키 → `String` 변환. `decode()`에서 `save_version`/필수 키/타입 검증 후 아이템 `rarity`·`itemLevel`·`seed`·`rollCount`·mod `tier`/`value`, `level`/`xp`/`xp_to_next`/`passive_points`/물약/`loot_seed`/`kills`, `currency_pouch` `int` 키, `Vector2` 복원.
+   - `src/world/save_manager.gd` (`SaveManager`): `user://save_slot_1.json` 대상 `.tmp` 쓰기 후 `DirAccess.rename_absolute()` 원자적 교체, `decode` 실패 시 `.bak` 백업.
+   - `src/actors/player.gd`: `to_save_dict()` / `apply_save_dict()` 추가 (존재하지 않는 패시브 노드는 버리고 포인트 환급, 마지막에 `recalculate_stats()` + HP/마나 최대치 회복).
+   - `src/world/arena.gd`: 시작 시 자동 로드(손상 시 `"세이브 파일 손상, 새 게임 시작"` 로그), 체크포인트/구역 이동/보스 처치/호르 보상/창 닫기(`NOTIFICATION_WM_CLOSE_REQUEST`) 시 자동 저장.
+
+### 바꾼 파일 및 검증
+- 신설: `src/core/save_codec.gd`, `src/world/save_manager.gd` *(원격 VM에 Godot 에디터가 없어 `.uid` 파일은 미생성 — 로컬 에디터 실행 시 생성되는 `.uid`는 다음 커밋에 반영 필요)*
+- 수정: `data/balance.json`, `src/actors/player.gd`, `src/world/arena.gd` (`tests/` 폴더는 수정하지 않음)
+- **테스트 실행 여부**: **테스트 미실행** (원격 VM에 `godot` 바이너리 없음)
+- **테스트 필요**: `SaveCodec.encode/decode`, `Player.to_save_dict/apply_save_dict`, 마나 물약 (Claude 담당)
