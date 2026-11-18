@@ -33,17 +33,22 @@ func create_normal_item(base_id: String, slot: String, item_level: int, seed_val
 	}
 
 
-func apply_currency(item: Dictionary, currency: int) -> bool:
-	var rarity: int = int(item.get("rarity", StatTypes.Rarity.NORMAL))
-	var rng := RandomNumberGenerator.new()
+func _advance_rng(item: Dictionary) -> RandomNumberGenerator:
 	var roll_count: int = int(item.get("rollCount", 0)) + 1
 	item["rollCount"] = roll_count
+	var rng := RandomNumberGenerator.new()
 	rng.seed = hash(str(item.get("seed", 0)) + ":" + str(roll_count))
+	return rng
+
+
+func apply_currency(item: Dictionary, currency: int) -> bool:
+	var rarity: int = int(item.get("rarity", StatTypes.Rarity.NORMAL))
 
 	match currency:
 		StatTypes.CurrencyType.BLOODSTONE_OF_SHIFT:
 			if rarity != StatTypes.Rarity.NORMAL:
 				return false
+			var rng := _advance_rng(item)
 			item["rarity"] = StatTypes.Rarity.MAGIC
 			_roll_mods(item, rng, 1, 2, 1, 1)
 			return true
@@ -51,6 +56,7 @@ func apply_currency(item: Dictionary, currency: int) -> bool:
 		StatTypes.CurrencyType.BLOODSTONE_OF_FORGE:
 			if rarity != StatTypes.Rarity.NORMAL:
 				return false
+			var rng := _advance_rng(item)
 			item["rarity"] = StatTypes.Rarity.RARE
 			_roll_mods(item, rng, 4, 6, 3, 3)
 			return true
@@ -58,12 +64,14 @@ func apply_currency(item: Dictionary, currency: int) -> bool:
 		StatTypes.CurrencyType.BLOODSTONE_OF_RUIN:
 			if rarity != StatTypes.Rarity.RARE:
 				return false
+			var rng := _advance_rng(item)
 			_roll_mods(item, rng, 4, 6, 3, 3)
 			return true
 
 		StatTypes.CurrencyType.BLOODSTONE_OF_PURGE:
 			if rarity == StatTypes.Rarity.NORMAL:
 				return false
+			_advance_rng(item)
 			item["rarity"] = StatTypes.Rarity.NORMAL
 			item["prefixes"] = []
 			item["suffixes"] = []
@@ -75,7 +83,13 @@ func apply_currency(item: Dictionary, currency: int) -> bool:
 			var total_mods: int = item["prefixes"].size() + item["suffixes"].size()
 			if total_mods >= 6:
 				return false
-			return _add_single_mod(item, rng, 3, 3)
+			var next_roll: int = int(item.get("rollCount", 0)) + 1
+			var rng := RandomNumberGenerator.new()
+			rng.seed = hash(str(item.get("seed", 0)) + ":" + str(next_roll))
+			if not _add_single_mod(item, rng, 3, 3):
+				return false
+			item["rollCount"] = next_roll
+			return true
 
 	return false
 
