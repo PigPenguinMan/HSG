@@ -149,7 +149,7 @@ func refresh() -> void:
 	}
 	for slot_key in _equip_buttons.keys():
 		var btn: Button = _equip_buttons[slot_key]
-		var item = player.equipment.get(slot_key)
+		var item: Variant = player.equipment.get(slot_key)
 		if item is Dictionary:
 			btn.text = "%s: %s" % [slot_labels[slot_key], _short_item_name(item)]
 			btn.modulate = _rarity_color(int(item.get("rarity", 0)))
@@ -214,7 +214,7 @@ func _on_currency_toggled(ctype: int, _btn: Button) -> void:
 func _show_equip_tooltip(slot_key: String) -> void:
 	if player == null:
 		return
-	var item = player.equipment.get(slot_key)
+	var item: Variant = player.equipment.get(slot_key)
 	if item is Dictionary:
 		_tooltip_label.text = _format_tooltip(item)
 

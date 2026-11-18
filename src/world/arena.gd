@@ -23,11 +23,13 @@ var _hor_reward_claimed: bool = false
 var _near_npc: Dictionary = {}
 var _near_waypoint: bool = false
 
+const InventoryPanelScript := preload("res://src/ui/inventory_panel.gd")
+const PassiveTreePanelScript := preload("res://src/ui/passive_tree_panel.gd")
 const SkillPanelScript := preload("res://src/ui/skill_panel.gd")
 const DarkFantasyThemeScript := preload("res://src/ui/dark_fantasy_theme.gd")
 
-var _inv_panel: InventoryPanel
-var _tree_panel: PassiveTreePanel
+var _inv_panel: InventoryPanelScript
+var _tree_panel: PassiveTreePanelScript
 var _skill_panel: SkillPanelScript
 var _prompt_label: Label
 var _dialog_panel: PanelContainer
@@ -70,7 +72,7 @@ func _ready() -> void:
 
 func _load_zones() -> void:
 	var text := FileAccess.get_file_as_string("res://data/act1_zones.json")
-	var parsed = JSON.parse_string(text)
+	var parsed: Variant = JSON.parse_string(text)
 	if parsed is Dictionary:
 		_zones = parsed.get("zones", {})
 
@@ -158,12 +160,12 @@ func _build_ui() -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	hud_layer.add_child(center)
 
-	_inv_panel = InventoryPanel.new()
+	_inv_panel = InventoryPanelScript.new()
 	center.add_child(_inv_panel)
 	_inv_panel.bind_player(_player)
 	_inv_panel.visibility_changed.connect(_sync_ui_block)
 
-	_tree_panel = PassiveTreePanel.new()
+	_tree_panel = PassiveTreePanelScript.new()
 	center.add_child(_tree_panel)
 	_tree_panel.bind_player(_player)
 	_tree_panel.visibility_changed.connect(_sync_ui_block)

@@ -18,7 +18,7 @@ static func calculate_hit(
 	var base_phys: float = float(skill.get("base_physical", 0.0)) + attacker_stats.get_stat("ADDED_PHYSICAL_DAMAGE", 0.0, skill_tags) * effectiveness
 	var base_fire: float = float(skill.get("base_fire", 0.0)) + attacker_stats.get_stat("ADDED_FIRE_DAMAGE", 0.0, skill_tags) * effectiveness
 
-	# 2. Savagery / Brutality style restriction (e.g. CANNOT_DEAL_NON_PHYSICAL)
+	# 2. Savagery restriction (e.g. CANNOT_DEAL_NON_PHYSICAL)
 	if attacker_stats.has_flag("CANNOT_DEAL_NON_PHYSICAL"):
 		base_fire = 0.0
 

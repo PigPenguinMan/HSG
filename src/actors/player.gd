@@ -112,7 +112,7 @@ func recalculate_stats() -> void:
 
 	# Equipped gear
 	for slot_key in equipment.keys():
-		var item = equipment[slot_key]
+		var item: Variant = equipment[slot_key]
 		if item is Dictionary:
 			_collect_item_mods(item)
 
@@ -173,7 +173,7 @@ func equip_from_inventory(inv_index: int) -> bool:
 	if not equipment.has(target_key):
 		return false
 
-	var previous = equipment[target_key]
+	var previous: Variant = equipment[target_key]
 	equipment[target_key] = item
 	if previous is Dictionary:
 		inventory[inv_index] = previous
@@ -294,7 +294,7 @@ func _physics_process(delta: float) -> void:
 func _load_skills_db() -> void:
 	if not FileAccess.file_exists("res://data/skills.json"):
 		return
-	var parsed = JSON.parse_string(FileAccess.get_file_as_string("res://data/skills.json"))
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://data/skills.json"))
 	if not parsed is Dictionary:
 		return
 	for s in parsed.get("active_skills", []):

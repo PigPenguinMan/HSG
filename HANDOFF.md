@@ -124,3 +124,20 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
 1. **(P1) `AGENTS.md` 컨벤션 정리 커밋**: 위 8건의 `Variant` 변수 타입(`var parsed: Variant = ...` 등) 명시 및 `damage_pipeline.gd` 주석의 `Brutality` 제거 (담당 예정 파일: `src/core/damage_pipeline.gd`, `src/core/item_generator.gd`, `src/core/passive_tree_graph.gd`, `src/actors/player.gd`, `src/ui/inventory_panel.gd`, `src/world/arena.gd`).
 2. **(P1) 밸런스 수치 `data/` JSON 분리 여부 결정**: 현재 `player.gd`·`enemy.gd`·`boss_brun.gd`에 있는 수치를 `data/balance.json` 등으로 뺄지, v0.1에서는 유지할지 사용자·Claude 확인 후 진행.
 3. **(P1) `src/core/` 단위 테스트 확장**: 51노드 패시브 트리·화염/주문 어픽스·`StatAggregator.clone()`에 대한 테스트를 `tests/phase0_tests.gd`에 보강.
+## 6. Antigravity 작업 보고 (2026-11-17, main @ 3404655) — AGENTS.md 컨벤션 정리
+
+### 반영 완료 (5.2의 1, 2, 4번)
+- **정적 타입 미명시 변수 8건 수정** (`: Variant` 명시)
+  - `src/core/item_generator.gd`: `parsed: Variant`
+  - `src/core/passive_tree_graph.gd`: `parsed: Variant`
+  - `src/actors/player.gd`: `item: Variant`, `previous: Variant`, `parsed: Variant`
+  - `src/ui/inventory_panel.gd`: `item: Variant` (2곳)
+  - `src/world/arena.gd`: `parsed: Variant`
+- **PoE 원작 고유명사 제거**: `src/core/damage_pipeline.gd` 주석에서 `Brutality` 제거
+- **`preload()` 통일**: `src/world/arena.gd`에서 `InventoryPanel`, `PassiveTreePanel`도 `preload()` 상수(`InventoryPanelScript`, `PassiveTreePanelScript`)로 참조하도록 변경
+- **정적 검사 결과**: `SPACE_INDENTS: 0`, `UNTYPED_FUNCS: 0`, `UNTYPED_VARS: 0`, `POE_TERMS: 0`
+- **테스트 실행 여부**: **테스트 미실행** (원격 VM에 `godot` 바이너리 없음)
+
+### 남은 일
+- **(P1) 밸런스 수치 `data/` 분리 여부**: `player.gd`·`enemy.gd`·`boss_brun.gd`·`arena.gd`에 있는 밸런스 수치를 `data/balance.json`으로 분리할지 사용자 결정 대기
+- **(P1) `src/core/` 단위 테스트 확장**: `tests/phase0_tests.gd`에 51노드 패시브 트리, 화염/주문 어픽스, `StatAggregator.clone()` 테스트 추가 (Claude 또는 사용자 확인 후 진행)
