@@ -17,7 +17,7 @@ var _telegraph_node: Polygon2D
 
 
 func _setup_stats() -> void:
-	_boss_bal = BalanceDBScript.get_section("boss_brun")
+	_boss_bal = preload("res://src/core/balance_db.gd").get_section("boss_brun")
 	max_hp = float(_boss_bal.get("max_hp", 900.0))
 	move_speed = float(_boss_bal.get("move_speed", 92.0))
 	attack_damage = float(_boss_bal.get("attack_damage", 24.0))
