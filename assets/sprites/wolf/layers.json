@@ -1,0 +1,31 @@
+{
+  "frame_size": [
+    32,
+    32
+  ],
+  "frames": 2,
+  "draw_order": [
+    "base.png",
+    "boots (v0.2)",
+    "outfit_default.png | body armour",
+    "scarf.png",
+    "weapon (v0.2)"
+  ],
+  "weapon_anchor": [
+    {
+      "frame": 0,
+      "hand": [
+        21,
+        23
+      ]
+    },
+    {
+      "frame": 1,
+      "hand": [
+        21,
+        24
+      ]
+    }
+  ],
+  "note": "Facing is done by flipping the parent node (player.gd _body_node.scale.x); layers must be children of it."
+}
