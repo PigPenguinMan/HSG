@@ -8,17 +8,29 @@ const SUITES: Array[Script] = [
 	preload("res://tests/phase0_tests.gd"),
 	preload("res://tests/core_tests.gd"),
 	preload("res://tests/balance_tests.gd"),
+	preload("res://tests/save_tests.gd"),
 ]
 
 
-func _init() -> void:
+## Waits one frame so root is inside the tree and added nodes get _ready() (Player tests).
+func _initialize() -> void:
+	await process_frame
+	_run()
+
+
+func _run() -> void:
 	var passed: int = 0
 	var failed: int = 0
 	for suite in SUITES:
 		var names: Array = suite.call("test_names")
 		for test_name in names:
 			var before: int = T.failure_count()
-			var label: String = suite.call(test_name)
+			var ret: Variant = suite.call(test_name)
+			# A script error aborts the test and returns null: count that as a failure.
+			var label: String = ret if ret is String else ""
+			if label == "":
+				T.failures.append("%s aborted (script error above) or returned no label" % test_name)
+				label = test_name
 			if T.failure_count() == before:
 				passed += 1
 				print("[PASS] " + label)

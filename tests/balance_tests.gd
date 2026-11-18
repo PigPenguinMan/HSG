@@ -16,6 +16,7 @@ const EXPECTED: Dictionary = {
 		"base_crit_chance": 0.15, "mana_regen_per_sec": 8.0,
 		"dash_speed": 620.0, "dash_duration": 0.16, "dash_cooldown": 1.2,
 		"flask_max_charges": 5, "flask_heal": 45.0,
+		"mana_flask_max_charges": 5, "mana_flask_restore": 40.0,
 		"xp_to_next_base": 100, "xp_level_multiplier": 1.45, "max_level": 20,
 		"starting_passive_points": 2,
 	},
