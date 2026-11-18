@@ -1,9 +1,30 @@
 class_name DarkFantasyTheme
 extends RefCounted
 
+# Galmuri11 (SIL OFL 1.1, see assets/fonts/Galmuri-OFL.txt). Bundled because web builds
+# cannot fall back to system fonts, so Korean text would render as tofu without it.
+const PIXEL_FONT_PATH: String = "res://assets/fonts/Galmuri11.woff2"
+
+
+# Loads the bundled pixel font with crisp settings (no antialiasing / hinting / subpixel).
+static func pixel_font() -> Font:
+	var f: FontFile = load(PIXEL_FONT_PATH) as FontFile
+	if f == null:
+		push_warning("DarkFantasyTheme: pixel font missing at %s" % PIXEL_FONT_PATH)
+		return null
+	f.antialiasing = TextServer.FONT_ANTIALIASING_NONE
+	f.hinting = TextServer.HINTING_NONE
+	f.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_DISABLED
+	return f
+
 
 static func build() -> Theme:
 	var t := Theme.new()
+	var font: Font = pixel_font()
+	if font != null:
+		t.default_font = font
+		# World-space labels (floating damage text, loot names) have no theme; give them the same font.
+		ThemeDB.fallback_font = font
 
 	var panel := StyleBoxFlat.new()
 	panel.bg_color = Color(0.07, 0.06, 0.08, 0.94)
