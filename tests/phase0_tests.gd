@@ -1,18 +1,6 @@
-class_name Phase0Tests
 extends RefCounted
 
 const T := preload("res://tests/test_check.gd")
-
-
-## Kept for src/world/arena.gd, which prints Phase 0 results on startup.
-static func run_all() -> Array[String]:
-	var results: Array[String] = []
-	var self_script: Script = load("res://tests/phase0_tests.gd")
-	for test_name in test_names():
-		var before: int = T.failure_count()
-		var label: String = self_script.call(test_name)
-		results.append(("[PASS] " if T.failure_count() == before else "[FAIL] ") + label)
-	return results
 
 
 static func test_names() -> Array[String]:

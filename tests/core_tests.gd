@@ -17,6 +17,9 @@ static func test_names() -> Array[String]:
 		"_test_rare_and_magic_roll_rules",
 		"_test_fire_and_spell_affixes_rollable",
 		"_test_zenith_adds_one_mod_up_to_six",
+		"_test_rejected_currency_leaves_item_untouched",
+		"_test_rejected_currency_cannot_reroll_ruin",
+		"_test_valid_currency_seed_sequence",
 		"_test_stat_aggregator_clone",
 	]
 
@@ -218,6 +221,99 @@ static func _test_zenith_adds_one_mod_up_to_six() -> String:
 	T.ok(not gen.apply_currency(normal, StatTypes.CurrencyType.BLOODSTONE_OF_RUIN), "ruin rejected on normal")
 	T.ok(not gen.apply_currency(normal, StatTypes.CurrencyType.BLOODSTONE_OF_PURGE), "purge rejected on normal")
 	return "Zenith: +1 mod per use up to 6, rejected at 6; invalid currencies rejected on normal"
+
+
+# ---------------------------------------------------------------- anti save-scum (HANDOFF §9.4-2)
+
+const ALL_CURRENCIES: Array[int] = [
+	StatTypes.CurrencyType.BLOODSTONE_OF_SHIFT,
+	StatTypes.CurrencyType.BLOODSTONE_OF_FORGE,
+	StatTypes.CurrencyType.BLOODSTONE_OF_RUIN,
+	StatTypes.CurrencyType.BLOODSTONE_OF_PURGE,
+	StatTypes.CurrencyType.BLOODSTONE_OF_ZENITH,
+]
+
+
+## Returns {rarity_name: item} with one normal, one magic and one rare item.
+static func _items_by_rarity(gen: ItemGenerator, seed_val: int) -> Dictionary:
+	var normal := gen.create_normal_item("base", "WEAPON", 30, seed_val)
+	var magic := gen.create_normal_item("base", "WEAPON", 30, seed_val)
+	gen.apply_currency(magic, StatTypes.CurrencyType.BLOODSTONE_OF_SHIFT)
+	var rare := gen.create_normal_item("base", "WEAPON", 30, seed_val)
+	gen.apply_currency(rare, StatTypes.CurrencyType.BLOODSTONE_OF_FORGE)
+	return {"normal": normal, "magic": magic, "rare": rare}
+
+
+static func _test_rejected_currency_leaves_item_untouched() -> String:
+	var gen := _load_gen()
+	var rejected: int = 0
+	for s in range(20):
+		var items := _items_by_rarity(gen, 500 + s)
+		for rname in items.keys():
+			for cur in ALL_CURRENCIES:
+				var item: Dictionary = (items[rname] as Dictionary).duplicate(true)
+				var before: Dictionary = item.duplicate(true)
+				if gen.apply_currency(item, cur):
+					continue
+				rejected += 1
+				T.ok(item == before, "rejected currency %d on %s changed the item (rollCount %s -> %s)" % [cur, rname, before["rollCount"], item["rollCount"]])
+
+	# Zenith that fails because no affix is left (RING caps at 5 mods, HANDOFF §10.1-2).
+	var ring := gen.create_normal_item("base", "RING", 30, 4242)
+	gen.apply_currency(ring, StatTypes.CurrencyType.BLOODSTONE_OF_FORGE)
+	var guard: int = 0
+	while gen.apply_currency(ring, StatTypes.CurrencyType.BLOODSTONE_OF_ZENITH) and guard < 6:
+		guard += 1
+	T.eq(ring["prefixes"].size() + ring["suffixes"].size(), 5, "ring rare tops out at 5 mods")
+	var full_before: Dictionary = ring.duplicate(true)
+	T.ok(not gen.apply_currency(ring, StatTypes.CurrencyType.BLOODSTONE_OF_ZENITH), "zenith rejected on full ring")
+	T.ok(ring == full_before, "failed zenith (no candidates) changed the ring")
+	T.ok(rejected > 0, "some currencies were rejected")
+	return "Rejected currency (wrong rarity or no affix left) leaves item and rollCount unchanged"
+
+
+static func _test_rejected_currency_cannot_reroll_ruin() -> String:
+	var gen := _load_gen()
+	for s in range(50):
+		var save := gen.create_normal_item("base", "WEAPON", 30, 900 + s)
+		gen.apply_currency(save, StatTypes.CurrencyType.BLOODSTONE_OF_FORGE)
+
+		var direct: Dictionary = save.duplicate(true)
+		gen.apply_currency(direct, StatTypes.CurrencyType.BLOODSTONE_OF_RUIN)
+
+		# Reload the same save, poke rejected currencies first, then Ruin.
+		var poked: Dictionary = save.duplicate(true)
+		T.ok(not gen.apply_currency(poked, StatTypes.CurrencyType.BLOODSTONE_OF_SHIFT), "shift rejected on rare")
+		T.ok(not gen.apply_currency(poked, StatTypes.CurrencyType.BLOODSTONE_OF_FORGE), "forge rejected on rare")
+		gen.apply_currency(poked, StatTypes.CurrencyType.BLOODSTONE_OF_RUIN)
+		T.ok(poked == direct, "seed %d: rejected currency changed the next Ruin result" % (900 + s))
+	return "Save-scum: poking rejected currencies before Ruin gives the same result (50 saves)"
+
+
+static func _test_valid_currency_seed_sequence() -> String:
+	# Valid uses keep the original contract: n-th accepted use seeds with hash("<seed>:<n>").
+	var gen := _load_gen()
+	var item := gen.create_normal_item("base", "WEAPON", 30, 31337)
+	gen.apply_currency(item, StatTypes.CurrencyType.BLOODSTONE_OF_FORGE)
+	T.eq(int(item["rollCount"]), 1, "forge is roll 1")
+
+	var expected := gen.create_normal_item("base", "WEAPON", 30, 31337)
+	expected["rarity"] = StatTypes.Rarity.RARE
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash("31337:1")
+	gen._roll_mods(expected, rng, 4, 6, 3, 3)
+	T.ok(item["prefixes"] == expected["prefixes"] and item["suffixes"] == expected["suffixes"], "forge roll matches hash(seed:1)")
+
+	gen.apply_currency(item, StatTypes.CurrencyType.BLOODSTONE_OF_RUIN)
+	T.eq(int(item["rollCount"]), 2, "ruin is roll 2")
+	rng = RandomNumberGenerator.new()
+	rng.seed = hash("31337:2")
+	gen._roll_mods(expected, rng, 4, 6, 3, 3)
+	T.ok(item["prefixes"] == expected["prefixes"] and item["suffixes"] == expected["suffixes"], "ruin roll matches hash(seed:2)")
+
+	T.ok(gen.apply_currency(item, StatTypes.CurrencyType.BLOODSTONE_OF_PURGE), "purge accepted on rare")
+	T.eq(int(item["rollCount"]), 3, "purge still advances rollCount")
+	return "Valid currency: n-th accepted use seeds with hash(seed:n) (forge, ruin, purge)"
 
 
 # ---------------------------------------------------------------- StatAggregator.clone()
