@@ -179,3 +179,37 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
 - **정적 검사 결과**: `balance.json` 파싱 정상, `SPACE_INDENTS: 0`, `UNTYPED_FUNCS: 0`, `UNTYPED_VARS: 0`, `POE_TERMS: 0`
 - **테스트 실행 여부**: **테스트 미실행** (원격 VM에 `godot` 바이너리 없음)
 - **테스트 필요**: `BalanceDB.ensure_loaded()` / `BalanceDB.get_section()` (`src/core/balance_db.gd`) 및 `data/balance.json` 분리 전후 수치 일치 검증 (Claude 담당)
+
+---
+
+## 9. Claude 작업 보고 (2026-11-18, main @ 093535e) — 테스트 환경 확보, §8 검증, 테스트 확장
+
+### 9.1 테스트 실행 환경
+- Claude 환경에 **Godot 4.7-stable 헤드리스**를 설치했습니다(공식 SHA512 체크섬 일치). 이제 Claude 쪽에서 테스트를 실제로 실행할 수 있습니다.
+- 실행한 것: 프로젝트 임포트, `tests/run_tests.gd`, 메인 씬 600프레임 헤드리스 실행(스크립트 에러 0건)
+- **테스트 러너 결함 수정 (P0)**: GDScript `assert()`는 `--script` 실행에서 실패해도 실행이 멈추지 않고 종료 코드도 0이었습니다. 그래서 테스트가 실패해도 "All passed"가 출력되는 상태였습니다. `tests/test_check.gd` 헬퍼로 실패를 기록하게 바꿨고, 이제 **실패가 하나라도 있으면 종료 코드 1**을 반환합니다.
+
+### 9.2 테스트 결과: **14/14 통과** (검사 138,666건)
+| 스위트 | 테스트 |
+|---|---|
+| `phase0_tests.gd` (기존 4개) | More 중복 방지, 피해 파이프라인, BFS 환불, 시드 RNG |
+| `core_tests.gd` (신규 7개) | 패시브 트리 무결성(51노드, START 1, APEX 3, 양방향 연결, 전체 도달 가능), 전체 배분 후 전체 환불, 어픽스 데이터 무결성(27종), 희귀·매직 굴림 규칙(아이템 3000개), 화염·주문 어픽스 5종 굴림 확인, Zenith 1개씩 추가하고 6개에서 거부, `StatAggregator.clone()` |
+| `balance_tests.gd` (신규 3개) | `BalanceDB` 로더(없는 섹션, 없는 파일 대체 동작), **분리 전후 수치 일치**, 보스 텔레그래프 0.8~1.2초(docs/05) |
+
+### 9.3 §8 밸런스 분리 검증
+- **수치 일치 확인**: 코드가 읽는 모든 키가 `balance.json`에 있고, 값이 분리 전(`405038e`)의 하드코딩 값과 모두 같습니다(`balance_tests.gd`의 `EXPECTED`에 회귀 테스트로 고정).
+  - 앞으로 수치를 **의도적으로** 바꿀 때는 `EXPECTED`도 함께 바꿔야 하므로, 수치 변경은 Claude에게 "테스트 필요"로 알려 주세요.
+- **동작이 바뀐 곳 1건 (사용자 결정 필요)**: 보스 처치 경험치가 **300 → 525**로 늘었습니다. `arena.gd`가 고정값 `300` 대신 `enemy.xp_reward`를 넘기게 바뀌었는데, 이 값에 몬스터 레벨 보정(보스 구역 Lv6, ×1.75)이 붙기 때문입니다. 문서에는 보스 경험치 규칙이 없습니다.
+
+### 9.4 발견한 문제
+1. **(P0, Claude가 수정함)** `BalanceDB.reload()`가 Godot 내장 함수 `Script.reload()`와 이름이 겹쳤습니다. preload한 스크립트로 `BalanceDBScript.reload()`를 부르면 우리 함수가 아니라 내장 함수가 호출됩니다. 게임 코드는 이 함수를 밖에서 부르지 않아서 증상은 없었습니다. 한 줄 수정이라 Claude가 `src/core/balance_db.gd`에서 **`load_from()`**으로 이름을 바꿨습니다.
+2. **(P1, Antigravity 담당) 세이브 스컴 방지 우회**: `ItemGenerator.apply_currency()`가 화폐를 쓸 수 있는지 검사하기 **전에** `rollCount`를 올립니다. 거부된 화폐는 소모되지 않는데도 RNG 상태가 바뀌어서, 세이브를 불러온 뒤 쓸 수 없는 화폐(예: 희귀 아이템에 Shift)를 한 번 눌러 보는 것만으로 다음 Ruin 결과가 달라집니다(Claude가 실험으로 확인).
+   - 수정안: 각 `match` 분기에서 사용 가능 여부를 검사한 **뒤에** `rollCount` 증가와 `rng.seed` 설정을 하도록 옮기기. 수정이 끝나면 Claude가 회귀 테스트를 추가합니다.
+3. **(P1, 사용자 결정 필요) 반지·갑옷은 옵션 최대 5개**: RING과 ARMOUR에 붙을 수 있는 접두사 그룹이 2개뿐이라 희귀 아이템이 6옵션에 도달할 수 없습니다. docs/03의 "희귀 4~6개"와 맞지 않습니다. 접두사 그룹을 추가할지, 문서를 고칠지 결정이 필요합니다.
+4. **(P2, Antigravity 담당)** `arena.gd`가 게임을 시작할 때마다 `Phase0Tests.run_all()`을 실행합니다. 게임 코드가 `tests/`에 의존하는 구조라, 이 호출은 빼는 것을 권장합니다. 호환을 위해 `run_all()`은 지금 그대로 유지했습니다.
+5. **(P2, 사용자 결정 필요)** Godot 4.4 이상은 `*.gd.uid`와 `*.png.import` 파일을 생성합니다. 지금 저장소에는 이 파일들이 커밋되어 있지 않습니다. Godot은 리소스 참조를 안정적으로 유지하려고 이 파일들을 커밋하도록 권장하지만, 이번 커밋에는 넣지 않았습니다.
+
+### 9.5 바꾼 파일
+- `tests/run_tests.gd`, `tests/phase0_tests.gd` (assert를 검사 헬퍼로 교체, `run_all()` 유지), 신규 `tests/test_check.gd`, `tests/core_tests.gd`, `tests/balance_tests.gd`
+- `src/core/balance_db.gd`: `reload` → `load_from` (9.4-1)
+- `AGENTS.md` §4: 테스트 종료 코드 규칙 추가

@@ -39,7 +39,9 @@ Claude Code는 `CLAUDE.md`를 통해 이 파일을 읽습니다. 규칙을 바�
   ```bash
   godot --headless --path . --script res://tests/run_tests.gd
   ```
-- `src/core/` 변경 시 `tests/phase0_tests.gd`에 테스트를 추가/수정하고 통과를 확인한 뒤 커밋
+- 종료 코드 `0` = 전체 통과, `1` = 실패 있음. 출력 끝의 `Tests: N passed, M failed` 줄로 확인
+- 테스트 파일(`tests/`)은 **Claude 담당**. `src/core/`나 `data/balance.json`의 동작·수치를 바꾸면 작업 보고에 "테스트 필요: <바뀐 함수/수치>"를 적는다
+- 검사는 `assert()` 대신 `tests/test_check.gd`의 `T.ok()` / `T.near()` / `T.eq()`를 쓴다 (`assert()`는 헤드리스 실행에서 실패를 잡지 못함)
 - 테스트를 끄거나 건너뛰어서 통과시키지 않는다
 - Godot을 실행할 수 없는 환경이면, 커밋/핸드오프에 **"테스트 미실행"**이라고 명시
 
