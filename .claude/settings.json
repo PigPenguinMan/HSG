@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "claude-code-game-development": {
+      "source": {
+        "source": "github",
+        "repo": "HermeticOrmus/claude-code-game-development"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "godot-development@claude-code-game-development": true
+  }
+}
