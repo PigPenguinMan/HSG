@@ -21,8 +21,9 @@ Claude Code는 `CLAUDE.md`를 통해 이 파일을 읽습니다. 규칙을 바�
 | `src/world/` | 구역, 드롭, 이펙트 | |
 | `src/ui/` | UI 패널, 테마 | UI 텍스트는 한국어 |
 | `scenes/` | `.tscn` 씬 | |
-| `assets/sprites/` | 픽셀아트 (32×32 / 48×48) | 텍스처 필터는 Nearest 유지 |
+| `assets/sprites/` | 픽셀아트 (32×32 / 48×48) | 텍스처 필터는 Nearest 유지. 플레이어는 파츠 레이어(`assets/sprites/wolf/`) |
 | `tests/` | 헤드리스 단위 테스트 | |
+| `tools/art/` | 아트 생성·분리 스크립트 (Python + Pillow) | 게임 코드가 아님. 결과물은 `assets/`에 저장 |
 
 ## 3. 코딩 컨벤션 (GDScript)
 - **들여쓰기는 탭**. 스페이스 들여쓰기 금지

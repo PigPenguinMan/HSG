@@ -401,3 +401,32 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
 - `docs/art_samples/.gdignore`: Godot 임포트 제외용 빈 파일
 - `assets/sprites/` 기존 파일은 수정하지 않았습니다.
 - **테스트 실행 여부**: **테스트 미실행** (아트 샘플 추가, 코드 변경 없음)
+
+---
+
+## 17. Claude 작업 보고 (2026-11-18, claude/tender-fermi-cvhqag) — 캐릭터 화풍 확정, 플레이어 파츠 레이어 분리
+
+### 17.1 사용자 확정 사항
+- **캐릭터 화풍**: Antigravity 샘플(`docs/art_samples/antigravity_wolf.png`)을 채택하고, 얼굴만 Claude가 수정했습니다(`antigravity_wolf_face_v2.png`: 눈 사이 얼룩 제거, 좌우 대칭, 작은 코). 이 그림을 `assets/sprites/wolf_player.png`에 반영했습니다. 형식이 같아서 코드 변경은 없습니다.
+- **장비 외형: A 방식(파츠 레이어)** — GDD의 "착용한 갑옷/무기 외형이 도트로 구분되도록 파츠 레이어링" 방향을 따릅니다. **적용은 v0.2**(장비 베이스 종류가 늘어날 때)에 하고, 지금은 레이어 구조만 준비했습니다.
+
+### 17.2 플레이어 레이어 (`assets/sprites/wolf/`, `tools/art/split_wolf_layers.py`로 생성)
+| 파일 | 내용 |
+|---|---|
+| `base.png` | 머리, 귀, 얼굴, 꼬리, 다리, 그림자 + 망토 아래 털 몸통(새로 그림) |
+| `outfit_default.png` | 기본 망토. 몸통 방어구를 끼면 이 레이어를 갑옷 레이어로 교체 |
+| `scarf.png` | 붉은 스카프. 항상 갑옷 위에 그림 |
+| `layers.json` | 그리는 순서, 프레임별 무기 손 위치(`weapon_anchor`) |
+- 모든 레이어는 `wolf_player.png`와 같은 64×32(32×32 프레임 2장), 같은 기준점입니다.
+- **불변 조건**: `base + outfit_default + scarf == wolf_player.png` (픽셀 단위). `tests/art_tests.gd`로 고정했습니다. 플레이어 그림을 고치면 `split_wolf_layers.py`를 다시 돌려서 레이어를 갱신해야 합니다.
+- **테스트: 26/26 통과**
+
+### 17.3 v0.2 구현 메모 (Antigravity 담당, 지금은 하지 않음)
+- `player.gd`의 `_body_node`(Sprite2D 1장)를 레이어 Sprite2D 여러 장으로 바꾸고, 모두 `_body_node`의 자식으로 둡니다. 그러면 좌우 반전(`scale.x`)이 자동으로 따라갑니다. `frame`은 모든 레이어에 같은 값을 넣습니다.
+- 그리는 순서: `base` → 장화 → 갑옷(없으면 `outfit_default`) → `scarf` → 무기
+- 무기 그림은 손잡이를 `layers.json`의 `weapon_anchor` 위치에 맞춥니다.
+- 아이템 베이스 데이터에 외형 키(예: `"visual": "armour_leather"`)를 추가하고, 장착이 바뀌면 해당 레이어 텍스처만 바꿉니다. 반지·목걸이는 외형이 없습니다.
+- 피격 깜빡임(`modulate`)은 `_body_node`에 주면 자식 레이어에도 함께 적용됩니다.
+
+### 17.4 다음 작업
+- 같은 화풍으로 나머지 캐릭터 6종(일반 적, 희귀 적, 보스 브룬, NPC 브람·리아·호르). 적과 NPC는 장비를 바꾸지 않으므로 한 장 그림으로 그립니다.
