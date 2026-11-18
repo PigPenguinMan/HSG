@@ -213,3 +213,16 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
 - `tests/run_tests.gd`, `tests/phase0_tests.gd` (assert를 검사 헬퍼로 교체, `run_all()` 유지), 신규 `tests/test_check.gd`, `tests/core_tests.gd`, `tests/balance_tests.gd`
 - `src/core/balance_db.gd`: `reload` → `load_from` (9.4-1)
 - `AGENTS.md` §4: 테스트 종료 코드 규칙 추가
+
+---
+
+## 10. Claude 작업 보고 (2026-11-18, claude/tender-fermi-cvhqag @ a601345) — §9 사용자 확정 사항 기록
+
+### 10.1 사용자 확정 사항
+1. **보스 처치 경험치**: 몬스터 레벨 보정을 적용한 값(보스 구역 Lv6 기준 **525**)을 **그대로 유지**합니다. 고정값 300으로 되돌리지 않습니다.
+2. **반지·갑옷 희귀 옵션 수**: 접두사 그룹을 추가하지 않고 **최대 5개로 확정**합니다. `docs/03_items_and_crafting.md`의 희귀도 표와 Zenith 설명에 반영했습니다.
+3. **Godot 생성 파일**: `*.gd.uid`, `*.png.import`를 **커밋해서 관리**합니다(`a601345`). 앞으로 새 스크립트나 에셋을 추가할 때 Godot이 만드는 `.uid`/`.import` 파일도 함께 커밋해 주세요.
+
+### 10.2 Antigravity에 남은 일 (§9.4에서 이어짐)
+- **(P1)** `ItemGenerator.apply_currency()`: 사용 가능 여부를 검사한 뒤에 `rollCount` 증가와 시드 설정을 하도록 수정 (세이브 스컴 방지 우회 차단). 끝나면 "테스트 필요"로 알려 주세요.
+- **(P2)** `src/world/arena.gd`: 게임 시작 시 `Phase0Tests.run_all()` 호출 제거. 제거하면 Claude가 `run_all()`을 정리합니다.
