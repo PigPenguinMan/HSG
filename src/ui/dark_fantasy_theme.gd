@@ -3,19 +3,25 @@ extends RefCounted
 
 # Galmuri11 (SIL OFL 1.1, see assets/fonts/Galmuri-OFL.txt). Bundled because web builds
 # cannot fall back to system fonts, so Korean text would render as tofu without it.
-const PIXEL_FONT_PATH: String = "res://assets/fonts/Galmuri11.woff2"
+const PIXEL_FONT_PATH: String = "res://assets/fonts/Galmuri11.ttf"
+
+static var _cached_font: FontFile = null
 
 
 # Loads the bundled pixel font with crisp settings (no antialiasing / hinting / subpixel).
 static func pixel_font() -> Font:
+	if _cached_font != null:
+		return _cached_font
+	if not ResourceLoader.exists(PIXEL_FONT_PATH):
+		return null
 	var f: FontFile = load(PIXEL_FONT_PATH) as FontFile
 	if f == null:
-		push_warning("DarkFantasyTheme: pixel font missing at %s" % PIXEL_FONT_PATH)
 		return null
 	f.antialiasing = TextServer.FONT_ANTIALIASING_NONE
 	f.hinting = TextServer.HINTING_NONE
 	f.subpixel_positioning = TextServer.SUBPIXEL_POSITIONING_DISABLED
-	return f
+	_cached_font = f
+	return _cached_font
 
 
 static func build() -> Theme:

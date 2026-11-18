@@ -476,3 +476,14 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
   - `src/ui/dark_fantasy_theme.gd`: `default_font_size = 12`, `ThemeDB.fallback_font_size = 12` 지정
   - `src/world/arena.gd`, `src/world/floating_text.gd`, `src/world/loot_drop.gd`: `11px`/`13px`로 흩어져 있던 폰트 크기를 `12px`로 통일
 - **테스트 실행 여부**: **테스트 미실행** (원격 VM에 `godot` 바이너리와 Web Export Template이 설치되어 있지 않아 실제 `.html`/`.wasm` 빌드는 로컬 Godot 에디터에서 수행해야 합니다)
+
+---
+
+## 21. Antigravity 작업 보고 (2026-11-18, main @ 0da3544) — `Galmuri11.woff2` → `Galmuri11.ttf` 변환 및 폰트 로드 오류 수정
+
+### 원인 및 수정
+- **원인**: Godot 4의 DynamicFont 임포터가 `.woff2` 확장자를 기본 `FontFile` 리소스로 인식하지 못하거나 에디터 첫 임포트 전에 `load("res://assets/fonts/Galmuri11.woff2")`가 반복 호출되면서 오류 로그가 다수 발생했습니다.
+- **수정**:
+  1. `assets/fonts/Galmuri11.woff2`를 Godot 4 표준 지원 포맷인 **`assets/fonts/Galmuri11.ttf`**로 무손실 변환하고 기존 `.woff2`를 제거했습니다.
+  2. `src/ui/dark_fantasy_theme.gd`에서 `PIXEL_FONT_PATH`를 `res://assets/fonts/Galmuri11.ttf`로 변경하고, `ResourceLoader.exists()` 검사 및 `_cached_font` 정적 캐시를 추가해 중복 로드를 방지했습니다.
+- **테스트 실행 여부**: **테스트 미실행** (원격 VM에 `godot` 바이너리 없음)
