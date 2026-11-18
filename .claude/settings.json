@@ -5,9 +5,16 @@
         "source": "github",
         "repo": "HermeticOrmus/claude-code-game-development"
       }
+    },
+    "pixelfx": {
+      "source": {
+        "source": "github",
+        "repo": "patch-gg/pixelfx"
+      }
     }
   },
   "enabledPlugins": {
-    "godot-development@claude-code-game-development": true
+    "godot-development@claude-code-game-development": true,
+    "pixelfx@pixelfx": true
   }
 }
