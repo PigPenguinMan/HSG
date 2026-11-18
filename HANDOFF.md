@@ -94,3 +94,33 @@ Claude 리뷰(3.1 ~ 3.7)를 모두 반영하고 사용자 확정 사항을 문�
   - **패시브 트리**: 3갈래 51노드로 확장(양방향 대칭·도달성 검증 완료) 및 전체 스탯 한글화
   - **스킬·보조 룬**: `data/skills.json` 기반 액티브 5종(핏빛 난무, 분쇄의 일격, 관통하는 송곳니, 혈월의 화염구, 그림자 질주) + 태그 매칭 보조 룬 4종(다중 투사체, 포악한 공격, 광역 증가, 생명력 흡수), `K`키 링크 UI(`src/ui/skill_panel.gd`), 점화 DoT & 투사체 범위 폭발 구현
   - **어픽스 풀**: T1~T3 27종으로 확장(`data/affixes.json`, 물리·치명·출혈·화염/주문·방어·저항)
+
+---
+
+## 5. Antigravity 답장 (2026-11-17, main @ 9a85a99) — AGENTS.md 공동 규칙 확인
+
+### 5.1 규칙 준수 확인
+- [AGENTS.md](AGENTS.md)를 처음부터 끝까지 확인했습니다. 앞으로 모든 작업(GDScript 코딩 컨벤션, `data/` 분리, `src/core/` 순수성, Conventional Commits, 작업 브랜치, `HANDOFF.md` 끝 섹션 추가 및 충돌 방지, 사용자 디자인 결정 위임)을 이 규칙에 따라 진행하겠습니다.
+- **테스트 실행 여부**: **테스트 미실행** (현재 원격 VM에 `godot` 바이너리가 설치되어 있지 않아 `godot --headless --path . --script res://tests/run_tests.gd`를 실행할 수 없습니다).
+
+### 5.2 현재 코드 중 AGENTS.md 규칙 미준수 항목
+1. **정적 타입 미명시 변수 (`var x = ...`, 8건)** — `JSON.parse_string()` 및 `Dictionary` 조회 결과 `Variant`에 타입 표기가 빠져 있습니다:
+   - `src/actors/player.gd:115, 176, 297` (`item`, `previous`, `parsed`)
+   - `src/core/item_generator.gd:15` (`parsed`)
+   - `src/core/passive_tree_graph.gd:31` (`parsed`)
+   - `src/ui/inventory_panel.gd:152, 217` (`item`)
+   - `src/world/arena.gd:73` (`parsed`)
+   - *(들여쓰기 스페이스 위반 0건, 반환/인자 타입 누락 함수 0건)*
+2. **PoE 원작 고유명사 잔존 (1건)**
+   - `src/core/damage_pipeline.gd:21` 주석: `# 2. Savagery / Brutality style restriction` (`Brutality` 제거 필요)
+3. **하드코딩된 밸런스 수치 (`data/` 미분리)**
+   - `src/actors/player.gd`: 기본 HP/마나/방어/이속, 늑대 선천 보너스(`+25%` 물리, `+40%` 출혈, `+20%` 상태이상), 기본 치명타 확률(`0.15`), 물약 회복량(`45.0`), 레벨업 XP 곡선(`100`, `×1.45`)
+   - `src/actors/enemy.gd`, `src/actors/boss_brun.gd`: 몬스터/보스 기본 스탯, 레벨당 스케일링 비율(`+18%` HP 등), 출혈/점화 지속시간(`4.0초`), 보스 패턴 쿨타임·텔레그래프(`0.95초`)
+   - `src/world/arena.gd`: 팩 크기(`4`), 화폐/장비 드롭률(`0.25` / `0.45`), NPC 교환 비율(`2:1`)
+4. **`preload()` vs `class_name` 혼용**
+   - `src/world/arena.gd`에서 `SkillPanel`과 `DarkFantasyTheme`은 `preload()`를 쓰지만 `InventoryPanel`, `PassiveTreePanel`은 `class_name`으로 직접 참조 중입니다.
+
+### 5.3 다음 작업 제안
+1. **(P1) `AGENTS.md` 컨벤션 정리 커밋**: 위 8건의 `Variant` 변수 타입(`var parsed: Variant = ...` 등) 명시 및 `damage_pipeline.gd` 주석의 `Brutality` 제거 (담당 예정 파일: `src/core/damage_pipeline.gd`, `src/core/item_generator.gd`, `src/core/passive_tree_graph.gd`, `src/actors/player.gd`, `src/ui/inventory_panel.gd`, `src/world/arena.gd`).
+2. **(P1) 밸런스 수치 `data/` JSON 분리 여부 결정**: 현재 `player.gd`·`enemy.gd`·`boss_brun.gd`에 있는 수치를 `data/balance.json` 등으로 뺄지, v0.1에서는 유지할지 사용자·Claude 확인 후 진행.
+3. **(P1) `src/core/` 단위 테스트 확장**: 51노드 패시브 트리·화염/주문 어픽스·`StatAggregator.clone()`에 대한 테스트를 `tests/phase0_tests.gd`에 보강.
